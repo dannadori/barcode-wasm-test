@@ -34,4 +34,9 @@ src/
     └── index.ts
 ```
 
+```
+1. ignore lint
+2. export Module
+3. put wasm public/static/js
+```
 

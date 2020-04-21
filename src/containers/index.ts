@@ -14,7 +14,8 @@ function mapStateToProps(state:GlobalState) {
 
 function mapDispatchToProps(dispatch: Dispatch) {
   return {
-    start:      () => {dispatch(Actions.start())},
+    start:      (args:string) => {dispatch(Actions.start(args))},
+    next:       () => {dispatch(Actions.next())}
   }
 }
 
