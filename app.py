@@ -16,6 +16,10 @@ if __name__ == '__main__':
     #context.load_cert_chain('server.crt', 'server.key')
 
     print('start')
+    files = glob.glob('./*')
+    print(files)
+    files = glob.glob('./build/*')
+    print(files)
 
     port = int(os.environ.get("PORT", 38888))
     #app.run(debug=True, use_reloader=False, host='0.0.0.0', port=port,  ssl_context=context, threaded=True)
