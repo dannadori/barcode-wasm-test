@@ -74,4 +74,5 @@ export const WorkerCommand = {
 
 export const WorkerResponse = {
     SCANED_BARCODE: 'scaned_barcode',
+    NOT_PREPARED: 'notprepared',
 }
