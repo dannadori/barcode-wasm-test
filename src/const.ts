@@ -1,5 +1,40 @@
 
 
+export const AppStatus = {
+    INITIALIZING: "initializing",
+    INITIALIZED : "initialized",
+    RUNNING     : "running",
+
+}
+
+export const AIConfig = {
+    SPLIT_COLS: 2,
+    SPLIT_ROWS: 4,
+    SPLIT_MERGIN: 0.2,
+    SPLIT_WIDTH: 300,
+    SPLIT_HEIGHT: 300,
+    TRANSFORMED_WIDTH: 400,
+    TRANSFORMED_HEIGHT: 400,
+    CROP_MARGIN: 20,
+
+    SS_MODEL_PATH: '/WEB_MODEL/icnet_0300x0300_0.10/model.json',
+
+}
+
+
+export const WorkerCommand = {
+    SET_OVERLAY:  'set_overlay',
+    SCAN_BARCODE: 'scan_barcode',
+}
+
+export const WorkerResponse = {
+    NOT_PREPARED   : 'not_prepared',
+    SCANED_BARCODE : 'scaned_barcode',
+}
+
+/////////////////////////////
+////// ディスプレイ設定  ////
+/////////////////////////////
 export const qvgaConstraints = {
     video: {
         facingMode: "environment",
@@ -59,19 +94,3 @@ export const DisplayConstraints = {
 } as const
 
 export const DisplayConstraint = DisplayConstraints.HD
-
-
-export const AppStatus = {
-    INITIALIZING: "initializing",
-    INITIALIZED : "initialized",
-
-}
-
-
-export const WorkerCommand = {
-    SCAN_BARCODE: 'scan_barcode',
-}
-
-export const WorkerResponse = {
-    SCANED_BARCODE: 'scaned_barcode',
-}

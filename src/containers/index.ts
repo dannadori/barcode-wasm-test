@@ -15,6 +15,7 @@ function mapStateToProps(state:GlobalState) {
 function mapDispatchToProps(dispatch: Dispatch) {
   return {
     initialized:      (args:string) => {dispatch(Actions.initialized(args))},
+    scanned    :      (args:string) => {dispatch(Actions.scanned(args))},
   }
 }
 

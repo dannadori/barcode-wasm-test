@@ -62,7 +62,11 @@ export function findOverlayLocation(parent: HTMLDivElement, videoWidth: number, 
         overlayHeight = overlayWidth * (videoHeight / videoWidth)
         overlayYOffset = (parentHeight - overlayHeight) / 2
     }
+    overlayWidth   = Math.floor(overlayWidth)
+    overlayHeight  = Math.floor(overlayHeight)
+    overlayXOffset = Math.floor(overlayXOffset)
+    overlayYOffset = Math.floor(overlayYOffset)
     //console.log('------------', overlayWidth, overlayHeight, overlayXOffset, overlayYOffset)
-    return { overlayWidth, overlayHeight, overlayXOffset, overlayYOffset }
+    return {  overlayWidth, overlayHeight, overlayXOffset, overlayYOffset }
 
 }
