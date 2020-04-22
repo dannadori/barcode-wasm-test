@@ -5,23 +5,23 @@ import { captureVideoImageToCanvas } from '../AI/PreProcessing';
 import { findOverlayLocation } from '../utils'
 
 
-const zxing_asm = require('../resources/zxing')
-zxing_asm.onRuntimeInitialized = function () {
-    console.log("initialized zxing_asm")
-    init_zxing = true
-}
-let init_zxing = false
-let decodePtr: any = null
-let decodeCallback: any = null
-let result: any = null
-let barcode: string | void | null = ""
+// const zxing_asm = require('../resources/zxing')
+// zxing_asm.onRuntimeInitialized = function () {
+//     console.log("initialized zxing_asm")
+//     init_zxing = true
+// }
+// let init_zxing = false
+// let decodePtr: any = null
+// let decodeCallback: any = null
+// let result: any = null
+// let barcode: string | void | null = ""
 
-// WASM
-decodeCallback = function (ptr: any, len: any, resultIndex: any, resultCount: any) {
-    result = new Uint8Array(zxing_asm.HEAPU8.buffer, ptr, len);
-    barcode = String.fromCharCode.apply(null, Array.from(result));
-};
-decodePtr = zxing_asm.addFunction(decodeCallback, 'iiiiiffffffff');
+// // WASM
+// decodeCallback = function (ptr: any, len: any, resultIndex: any, resultCount: any) {
+//     result = new Uint8Array(zxing_asm.HEAPU8.buffer, ptr, len);
+//     barcode = String.fromCharCode.apply(null, Array.from(result));
+// };
+// decodePtr = zxing_asm.addFunction(decodeCallback, 'iiiiiffffffff');
 
 
 
@@ -146,12 +146,12 @@ class App extends React.Component {
         t_ctx.drawImage(img_elem, 0, 0, t_canvas.width, t_canvas.height)
         const imageData = t_ctx.getImageData(0, 0, t_canvas.width, t_canvas.height);
         const idd = imageData.data;
-        const t_image = zxing_asm._resize(t_canvas.width, t_canvas.height);
-        for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
-            zxing_asm.HEAPU8[t_image + j] = idd[i];
-        }
-        const err = zxing_asm._decode_multi(decodePtr);
-        console.log("SCANNRESULT!: ",barcode)
+        // const t_image = zxing_asm._resize(t_canvas.width, t_canvas.height);
+        // for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
+        //     zxing_asm.HEAPU8[t_image + j] = idd[i];
+        // }
+        // const err = zxing_asm._decode_multi(decodePtr);
+        // console.log("SCANNRESULT!: ",barcode)
 
 
 
@@ -174,13 +174,7 @@ class App extends React.Component {
         if(gs.status === AppStatus.INITIALIZED){
             console.log('initialized')
             this.checkParentSizeChanged(video, props)
-            if(init_zxing === true){
-                this.requestScanBarcode()
-            }else{
-                requestAnimationFrame(() => {
-                    props.initialized()
-                });
-            }
+            this.requestScanBarcode()
         }
 
         return (
