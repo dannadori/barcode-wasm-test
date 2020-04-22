@@ -139,13 +139,12 @@ class App extends React.Component {
 
     requestScanBarcode = ()=> {
         const img_elem = this.imageRef.current!
-        const t_canvas = document.createElement('canvas');
-        t_canvas.width = img_elem.width
-        t_canvas.height = img_elem.height
+        const t_canvas = new OffscreenCanvas(img_elem.width, img_elem.height)
         const t_ctx = t_canvas.getContext("2d")!
         t_ctx.drawImage(img_elem, 0, 0, t_canvas.width, t_canvas.height)
-        const imageData = t_ctx.getImageData(0, 0, t_canvas.width, t_canvas.height);
-        const idd = imageData.data;
+        const image = t_canvas.transferToImageBitmap()
+        // const imageData = t_ctx.getImageData(0, 0, t_canvas.width, t_canvas.height);
+        // const idd = imageData.data;
         // const t_image = zxing_asm._resize(t_canvas.width, t_canvas.height);
         // for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
         //     zxing_asm.HEAPU8[t_image + j] = idd[i];
@@ -162,7 +161,7 @@ class App extends React.Component {
         // console.log("IMAGE SIZE2:",canvas.width,canvas.height)
         // const ctx = controller.getContext("2d")!
         // ctx.putImageData(image,100,100)
-        this.worker.postMessage({message:WorkerCommand.SCAN_BARCODE, image:imageData})
+        this.worker.postMessage({message:WorkerCommand.SCAN_BARCODE, image:image},[image])
     }
 
     
