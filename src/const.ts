@@ -8,8 +8,8 @@ export const AppStatus = {
 }
 
 export const AIConfig = {
-    SPLIT_COLS: 2,
-    SPLIT_ROWS: 6,
+    SPLIT_COLS: 3,
+    SPLIT_ROWS: 2,
     // SPLIT_COLS: 2,
     // SPLIT_ROWS: 4,
     SPLIT_MERGIN: 0.2,
@@ -95,4 +95,4 @@ export const DisplayConstraints = {
     EightK: eightKConstraints,
 } as const
 
-export const DisplayConstraint = DisplayConstraints.FULLHD
+export const DisplayConstraint = DisplayConstraints.HD

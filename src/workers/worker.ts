@@ -23,11 +23,8 @@ let result: any = null
 let barcode: string | void | null = ""
 
 decodeCallback = function (ptr: any, len: any, resultIndex: any, resultCount: any) {
-    console.log("INNER_BARCODE1")
     const result = new Uint8Array(zxing_asm.HEAPU8.buffer, ptr, len);
-    console.log("INNER_BARCODE2",barcode)
     barcode = String.fromCharCode.apply(null, Array.from(result));
-    console.log("INNER_BARCODE3",barcode)
 };
 decodePtr = zxing_asm.addFunction(decodeCallback, 'iiiiiffffffff');
 
@@ -167,31 +164,42 @@ let overlay: OffscreenCanvas | null = null
 //     return barcode
 // }
 
+
+
+
+const canvas = new OffscreenCanvas(2048, 2048)
+
+
 export const scanBarcode_old = (image: ImageBitmap, angle: number[]): string => {
     barcode = ""
 
-    console.log("start scan")
-    const width  = Math.floor(image.width/1)
-    const height = Math.floor(image.height/1)
-    const canvas = new OffscreenCanvas(width, height)
-    const ctx = canvas.getContext('2d')!
-    ctx.drawImage(image, 0, 0, width, height)
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const idd = imageData.data;
-    const input = zxing_asm._resize(width, height);
-    for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
-        zxing_asm.HEAPU8[input + j] = idd[i];
-    }    
-//    const err = zxing_asm._decode_multi(decodePtr);
-    const err = zxing_asm._decode_ean13(decodePtr);
-    console.log("end scan,", + err)
+//    console.log("start scan")
+    with_time("ONE SCAN BARCODE TIME 1: ", () => {
+        const width  = Math.floor(image.width/1)
+        const height = Math.floor(image.height/1)
+//        const canvas = new OffscreenCanvas(width, height)
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(image, 0, 0, width, height)
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const idd = imageData.data;
+        const input = zxing_asm._resize(width, height);
+            for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
+                zxing_asm.HEAPU8[input + j] = idd[i];
+            }    
+    },true)
 
-    if(overlay !==null){
-        overlay.width  = width
-        overlay.height = height
-        const tmp_ctx  = overlay?.getContext("2d")!
-        tmp_ctx.putImageData(imageData, 0, 0,)
-    }
+//    const err = zxing_asm._decode_multi(decodePtr);
+    with_time("ONE SCAN BARCODE TIME 2:", () => {
+        const err = zxing_asm._decode_ean13(decodePtr);
+    },true)
+//    console.log("end scan,", + err)
+
+    // if(overlay !==null){
+    //     overlay.width  = width
+    //     overlay.height = height
+    //     const tmp_ctx  = overlay?.getContext("2d")!
+    //     tmp_ctx.putImageData(imageData, 0, 0,)
+    // }
 
 
     return barcode
@@ -220,7 +228,7 @@ onmessage = (event) => {
                 with_time("SCAN BARCODE TIME", () => {
                     const result = scanBarcode_old(image, angles)
                     barcodes.push(result)
-                },false)
+                },true)
             }
             //const barcodes = scanBarcode(images, angles)
 
