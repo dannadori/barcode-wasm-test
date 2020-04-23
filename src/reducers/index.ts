@@ -6,13 +6,18 @@ export interface GlobalState {
     status: string
     barcode: string
     execScan: boolean
+
+    img_src: string
 }
 
 export const initialState = {
     counter: 0,
     status: AppStatus.INITIALIZING,
-    barcode: "",
+    barcode: "",    
     execScan: false,
+
+    img_src: "imgs/barcode02.png",
+
 }
 
 const reducer = (state: GlobalState=initialState, action:any) => {

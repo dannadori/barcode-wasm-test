@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, DisplayConstraint, WorkerCommand } from '../const';
-import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid } from '../AI/PreProcessing';
+import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig } from '../const';
+import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
 import { ToastProvider, useToasts } from 'react-toast-notifications'
 
@@ -30,6 +30,7 @@ class App extends React.Component {
     // HTML Component //
     ////////////////////
     parentRef = React.createRef<HTMLDivElement>()
+    imageRef = React.createRef<HTMLImageElement>()
     videoRef = React.createRef<HTMLVideoElement>()
     controllerCanvasRef = React.createRef<HTMLCanvasElement>()
     workerMonitorCanvasRef = React.createRef<HTMLCanvasElement>()
@@ -197,6 +198,11 @@ class App extends React.Component {
         controller.width = this.overlayWidth
         controller.height = this.overlayHeight
 
+        const img_elem = this.imageRef.current!
+
+        
+        
+
         if(video.width === 0 || video.height === 0){ // Videoが準備されていない場合スキップ
             window.requestAnimationFrame(this.execMainLoop);
         }
@@ -211,23 +217,32 @@ class App extends React.Component {
         const boxMetadata = splitCanvasToBoxes(captureCanvas)
         drawBoxGrid(controller, boxMetadata)
 
-        //const images = getBoxImages(captureCanvas, boxMetadata)
+        const images = getBoxImages(captureCanvas, boxMetadata)
         //this.drawBoxSampleImage(controller, images[5])
 
 
-        const images = getBoxImageBitmap(captureCanvas, boxMetadata)
+        //const images = getBoxImageBitmap(captureCanvas, boxMetadata)
+        
 
         // for(let i = 0; i < AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS; i++){
         //     this.workers[i].postMessage({ message: WorkerCommand.SCAN_BARCODE, image: images[i] })
         // }
         // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images })
-        try{
-//            this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
-            this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90] }, images)
-        }catch(e){
-            console.log("Exception occured: but if you get this exception, no problem by wo")
-            console.log(e)
-        }
+        //    this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
+        //this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0] })
+
+
+        // const canvas = new OffscreenCanvas(img_elem.width, img_elem.height);
+        // const ctx = canvas.getContext('2d')!
+        // ctx.drawImage(img_elem, 0, 0, canvas.width, canvas.height)
+        // const image = canvas.transferToImageBitmap()
+        // console.log("[Image]", image)
+
+//        const image = ctx.getImageData(0,0,canvas.width, canvas.height)
+        
+        // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image], angles:[0] }, [image])
+//        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image], angles:[0] })
+
 
         // this.controllerCanvasRef.current!.width = this.overlayWidth
         // this.controllerCanvasRef.current!.height = this.overlayHeight
@@ -235,6 +250,15 @@ class App extends React.Component {
         // ctx.putImageData(image, 0, 0, 0, 0, image.width, image.height)
         // ctx.fillText("AAAAAAAAAAAAAAAAAAAAAAAAAAa",100,100)
         // console.log(">>>>>", this.controllerCanvasRef.current!.width, this.controllerCanvasRef.current!.height, image.width, image.height)
+
+
+        const t_canvas = document.createElement("canvas")
+        const t_ctx = t_canvas.getContext("2d")!
+        t_ctx.drawImage(img_elem, 0, 0, img_elem.width, img_elem.height)
+        // const image = t_canvas.transferToImageBitmap()
+        const image = t_ctx.getImageData(0, 0, img_elem.width, img_elem.height)
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image], angles:[0] })
+
         captureCanvas.remove()
 
     }
@@ -247,6 +271,7 @@ class App extends React.Component {
 
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
+                <img src={gs.img_src} alt="barcode" ref={this.imageRef} />
                 <video
                     autoPlay
                     playsInline
