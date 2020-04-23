@@ -94,11 +94,11 @@ class App extends React.Component {
                     } )
                     if(i === 0){
                         //window.requestAnimationFrame(this.execMainLoop);
-                        props.initialized()
+                        // props.initialized()
                     }
                 }else if (event.data.message === WorkerResponse.NOT_PREPARED){
                     if(i === 0){
-                        props.initialized()
+                        // props.initialized()
                         //window.requestAnimationFrame(this.execMainLoop);
                     }
                 }
@@ -176,6 +176,21 @@ class App extends React.Component {
                     console.error(error);
                 });
         }
+
+
+        this.controllerCanvasRef.current!.addEventListener("touchstart", (e)=>{
+            e.preventDefault(); 
+            props.startSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+        }, { passive: false })
+        this.controllerCanvasRef.current!.addEventListener("touchmove", (e)=>{
+            e.preventDefault(); 
+            props.moveSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+        }, { passive: false })
+        this.controllerCanvasRef.current!.addEventListener("touchend", (e)=>{
+            e.preventDefault(); 
+            props.endSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+        }, { passive: false })
+           
     }
 
     execMainLoop = async () => {
@@ -214,59 +229,91 @@ class App extends React.Component {
         // // drawGrid(controller, 100)
 
         const captureCanvas = captureVideoImageToCanvas(video)
-        // const boxMetadata = splitCanvasToBoxes(captureCanvas)
-        // drawBoxGrid(controller, boxMetadata)
+        const boxMetadata = splitCanvasToBoxes(captureCanvas)
+        drawBoxGrid(controller, boxMetadata)
 
-        // //const images = getBoxImages(captureCanvas, boxMetadata)
-        // //this.drawBoxSampleImage(controller, images[5])
+        //const images = getBoxImages(captureCanvas, boxMetadata)
+        //this.drawBoxSampleImage(controller, images[5])
 
 
-        // const images = getBoxImageBitmap(captureCanvas, boxMetadata)
+        const images = getBoxImageBitmap(captureCanvas, boxMetadata)
         
         // // for(let i = 0; i < AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS; i++){
         // //     this.workers[i].postMessage({ message: WorkerCommand.SCAN_BARCODE, image: images[i] })
         // // }
         // // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images })
-        // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
 
 
-        ///////////////////////////////
-        ///// for scaning test  ///////
-        ///////////////////////////////
-        const img_elem1 = this.imageRef1.current!
-        const img_elem2 = this.imageRef2.current!
-        const t_canvas1 = new OffscreenCanvas(img_elem1.width, img_elem1.height)
-        const t_ctx1 = t_canvas1.getContext("2d")!
-        t_ctx1.drawImage(img_elem1, 0, 0, img_elem1.width, img_elem1.height)
-        const image1 = t_canvas1.transferToImageBitmap()
+        // ///////////////////////////////
+        // ///// for scaning test  ///////
+        // ///////////////////////////////
+        // const img_elem1 = this.imageRef1.current!
+        // const img_elem2 = this.imageRef2.current!
+        // const t_canvas1 = new OffscreenCanvas(img_elem1.width, img_elem1.height)
+        // const t_ctx1 = t_canvas1.getContext("2d")!
+        // t_ctx1.drawImage(img_elem1, 0, 0, img_elem1.width, img_elem1.height)
+        // const image1 = t_canvas1.transferToImageBitmap()
 
-        const t_canvas2 = new OffscreenCanvas(img_elem2.width, img_elem2.height)
-        const t_ctx2 = t_canvas2.getContext("2d")!
-        t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
-        const image2 = t_canvas2.transferToImageBitmap()
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1,image2], angles:[0] }, [image1, image2])
+        // const t_canvas2 = new OffscreenCanvas(img_elem2.width, img_elem2.height)
+        // const t_ctx2 = t_canvas2.getContext("2d")!
+        // t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
+        // const image2 = t_canvas2.transferToImageBitmap()
+        // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1,image2], angles:[0] }, [image1, image2])
 
         captureCanvas.remove()
 
     }
 
-    load = false
-    loaded = ()=>{
-        this.load = true
-        console.log("image loaded")
+    cropRectAndScan = (start_x:number, start_y:number, end_x:number, end_y:number) => {
+        const video = this.videoRef.current!
+        const controller = this.controllerCanvasRef.current!
+
+        const start_xr = (start_x / controller.width)  * video.width
+        const end_xr   = (end_x / controller.width)    * video.width
+        const start_yr = (start_y / controller.height) * video.height
+        const end_yr   = (end_y / controller.height)   * video.height
+
+        const captureCanvas = captureVideoImageToCanvas(video)
+        const ctx = captureCanvas.getContext("2d")!
+        const image = ctx.getImageData(start_xr, start_yr, end_xr - start_xr, end_yr - start_yr)
+
+        const ctx2 = controller.getContext("2d")!
+        ctx2.putImageData(image,0,0)
+
+
+        const offscreen = new OffscreenCanvas(image.width, image.height)
+        const ctx3 = offscreen.getContext("2d")!
+        ctx3.putImageData(image,0,0)
+        const input = offscreen.transferToImageBitmap()
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [input], angles:[0, 90, 5, 85] }, [input])
+        
     }
+
+
     render() {
         const gs = this.props as GlobalState
         const props = this.props as any
         const video = this.videoRef.current!
-
+        const controller = this.controllerCanvasRef.current!
 
         if(gs.status === AppStatus.INITIALIZED){
             console.log('initialized')
             this.checkParentSizeChanged(video)
-            this.requestScanBarcode()
+//            this.requestScanBarcode()
         }
-        
+
+        if(gs.inSelect===true){
+            const ctx = controller.getContext("2d")!
+            ctx.clearRect(0, 0, controller.width, controller.height)
+            ctx.strokeRect(gs.select_start_x, gs.select_start_y, gs.select_end_x-gs.select_start_x, gs.select_end_y-gs.select_start_y)
+        }else if(gs.finSelect===true){
+            const ctx = controller.getContext("2d")!
+            ctx.clearRect(0, 0, controller.width, controller.height)
+            console.log("rect selected", gs.select_start_x, gs.select_start_y, gs.select_end_x, gs.select_end_y)
+            this.cropRectAndScan(gs.select_start_x, gs.select_start_y, gs.select_end_x, gs.select_end_y)
+        }
+
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
                 <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} />
@@ -281,13 +328,13 @@ class App extends React.Component {
                     height={this.videoHeight}
                 />
                 <canvas
-                    ref={this.controllerCanvasRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, }}
-                    width={this.overlayWidth}
-                    height={this.overlayHeight}
+                    ref = {this.workerMonitorCanvasRef}
+                    style = {{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, }}
+                    width = {this.overlayWidth}
+                    height = {this.overlayHeight}
                 />
                 <canvas
-                    ref={this.workerMonitorCanvasRef}
+                    ref={this.controllerCanvasRef}
                     style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, }}
                     width={this.overlayWidth}
                     height={this.overlayHeight}
@@ -299,6 +346,19 @@ class App extends React.Component {
             </div>
         )
     }
+
+    // selectStart = (e:any) =>{
+    // }
+    // selectMove = (e:any) =>{
+    //     e.preventDefault(); 
+    //     console.log(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+    // }
+
+    // selectEnd = (e:any) =>{
+    //     e.preventDefault(); 
+    //     console.log(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+    // }
+
 
 }
 

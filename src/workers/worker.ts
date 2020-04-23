@@ -171,18 +171,28 @@ export const scanBarcode_old = (image: ImageBitmap, angle: number[]): string => 
     barcode = ""
 
     console.log("start scan")
-    const canvas = new OffscreenCanvas(image.width, image.height)
+    const width  = Math.floor(image.width/1)
+    const height = Math.floor(image.height/1)
+    const canvas = new OffscreenCanvas(width, height)
     const ctx = canvas.getContext('2d')!
-    ctx.drawImage(image, 0, 0)
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, width, height)
+    const imageData = ctx.getImageData(0, 0, width, height);
     const idd = imageData.data;
-    const input = zxing_asm._resize(canvas.width, canvas.height);
+    const input = zxing_asm._resize(width, height);
     for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
         zxing_asm.HEAPU8[input + j] = idd[i];
     }    
 //    const err = zxing_asm._decode_multi(decodePtr);
     const err = zxing_asm._decode_ean13(decodePtr);
     console.log("end scan,", + err)
+
+    if(overlay !==null){
+        overlay.width  = width
+        overlay.height = height
+        const tmp_ctx  = overlay?.getContext("2d")!
+        tmp_ctx.putImageData(imageData, 0, 0,)
+    }
+
 
     return barcode
 }
@@ -212,7 +222,6 @@ onmessage = (event) => {
                     barcodes.push(result)
                 },false)
             }
-            
             //const barcodes = scanBarcode(images, angles)
 
             ctx.postMessage({ message: WorkerResponse.SCANED_BARCODE, barcodes: barcodes })

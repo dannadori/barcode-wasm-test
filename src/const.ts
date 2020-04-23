@@ -95,4 +95,4 @@ export const DisplayConstraints = {
     EightK: eightKConstraints,
 } as const
 
-export const DisplayConstraint = DisplayConstraints.HD
+export const DisplayConstraint = DisplayConstraints.FULLHD

@@ -7,7 +7,12 @@ export interface GlobalState {
     barcode: string
     execScan: boolean
 
-    img_src: string
+    select_start_x: number
+    select_start_y: number
+    select_end_x: number
+    select_end_y: number
+    inSelect : boolean
+    finSelect:boolean
 }
 
 export const initialState = {
@@ -16,7 +21,13 @@ export const initialState = {
     barcode: "",    
     execScan: false,
 
-    img_src: "imgs/barcode02.png",
+
+    select_start_x: 0,
+    select_start_y: 0,
+    select_end_x: 0,
+    select_end_y: 0,
+    inSelect : false,
+    finSelect: false,
 
 }
 
@@ -36,7 +47,25 @@ const reducer = (state: GlobalState=initialState, action:any) => {
             gs.execScan = true
             gs.barcode  = action.payload
             break
-    
+
+        case 'START_SELECT':
+            gs.select_start_x = action.payload[0]
+            gs.select_start_y = action.payload[1]
+            break
+
+        case 'MOVE_SELECT':
+            gs.select_end_x = action.payload[0]
+            gs.select_end_y = action.payload[1]
+            gs.inSelect = true
+            break
+
+        case 'END_SELECT':
+            gs.select_end_x = action.payload[0]
+            gs.select_end_y = action.payload[1]
+            gs.inSelect     = false
+            gs.finSelect    = true
+            break
+                            
     }
     return gs
 }
