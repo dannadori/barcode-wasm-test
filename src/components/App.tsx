@@ -216,10 +216,10 @@ class App extends React.Component {
             window.requestAnimationFrame(this.execMainLoop);
         }
 
-        if(this.load === false || gs.counter <20){
-            window.requestAnimationFrame(this.execMainLoop);
+        // if(this.load === false || gs.counter <20){
+        //     window.requestAnimationFrame(this.execMainLoop);
 
-        }
+        // }
         // drawGrid(controller, 100)
 
         console.log(video.width, video.height, this.overlayWidth ,this.overlayHeight)
@@ -270,14 +270,14 @@ class App extends React.Component {
         // const image = t_canvas.transferToImageBitmap()
         const image1 = t_ctx1.getImageData(0, 0, img_elem1.width, img_elem1.height)
 
-        // const t_canvas2 = document.createElement("canvas")
-        // const t_ctx2 = t_canvas2.getContext("2d")!
-        // t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
-        // // const image = t_canvas.transferToImageBitmap()
-        // const image2 = t_ctx2.getImageData(0, 0, img_elem2.width, img_elem2.height)
+        const t_canvas2 = document.createElement("canvas")
+        const t_ctx2 = t_canvas2.getContext("2d")!
+        t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
+        // const image = t_canvas.transferToImageBitmap()
+        const image2 = t_ctx2.getImageData(0, 0, img_elem2.width, img_elem2.height)
 
         
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1], angles:[0] })
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1,image2], angles:[0] })
 
         captureCanvas.remove()
 
@@ -302,8 +302,8 @@ class App extends React.Component {
         
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
-                <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} onLoad={()=>this.loaded()}/>
-                {/* <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef1} /> */}
+                <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} />
+                <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef2} />
                 <video
                     autoPlay
                     playsInline
