@@ -144,9 +144,13 @@ export const getBoxImageBitmap = (canvas:HTMLCanvasElement,  boxMetadata:SplitCa
         const width   = Math.floor(box.maxX * canvas.width  - box.minX * canvas.width) 
         const height  = Math.floor(box.maxY * canvas.height - box.minY * canvas.height)
 
+        if (width === 0 || height === 0){ // イメージがまだ準備しきれていない段階。
+            return []
+        }
         const offscreen = new OffscreenCanvas(width, height)
+
         const offctx    = offscreen.getContext("2d")!
-        offctx.drawImage(canvas, start_x, start_y, width, height, 0, 0,width,height)
+        offctx.drawImage(canvas, start_x, start_y, width, height, 0, 0, width, height)
         const imageBitmap = offscreen.transferToImageBitmap()
         res.push(imageBitmap)
     }

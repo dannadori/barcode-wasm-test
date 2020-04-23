@@ -203,65 +203,38 @@ class App extends React.Component {
         controller.width = this.overlayWidth
         controller.height = this.overlayHeight
 
+
+        // if(video.width === 0 || video.height === 0){ // Videoが準備されていない場合スキップ
+        //     window.requestAnimationFrame(this.execMainLoop);
+        // }
+        // if(this.overlayWidth === 0 || this.overlayHeight === 0){ // Videoが準備されていない場合スキップ
+        //     window.requestAnimationFrame(this.execMainLoop);
+        // }
+
+        // // drawGrid(controller, 100)
+
+        const captureCanvas = captureVideoImageToCanvas(video)
+        // const boxMetadata = splitCanvasToBoxes(captureCanvas)
+        // drawBoxGrid(controller, boxMetadata)
+
+        // //const images = getBoxImages(captureCanvas, boxMetadata)
+        // //this.drawBoxSampleImage(controller, images[5])
+
+
+        // const images = getBoxImageBitmap(captureCanvas, boxMetadata)
+        
+        // // for(let i = 0; i < AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS; i++){
+        // //     this.workers[i].postMessage({ message: WorkerCommand.SCAN_BARCODE, image: images[i] })
+        // // }
+        // // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images })
+        // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
+
+
+        ///////////////////////////////
+        ///// for scaning test  ///////
+        ///////////////////////////////
         const img_elem1 = this.imageRef1.current!
         const img_elem2 = this.imageRef2.current!
-
-
-        
-
-        if(video.width === 0 || video.height === 0){ // Videoが準備されていない場合スキップ
-            window.requestAnimationFrame(this.execMainLoop);
-        }
-        if(this.overlayWidth === 0 || this.overlayHeight === 0){ // Videoが準備されていない場合スキップ
-            window.requestAnimationFrame(this.execMainLoop);
-        }
-
-        // if(this.load === false || gs.counter <20){
-        //     window.requestAnimationFrame(this.execMainLoop);
-
-        // }
-        // drawGrid(controller, 100)
-
-        console.log(video.width, video.height, this.overlayWidth ,this.overlayHeight)
-        const captureCanvas = captureVideoImageToCanvas(video)
-        const boxMetadata = splitCanvasToBoxes(captureCanvas)
-        drawBoxGrid(controller, boxMetadata)
-
-        //const images = getBoxImages(captureCanvas, boxMetadata)
-        //this.drawBoxSampleImage(controller, images[5])
-
-
-        //const images = getBoxImageBitmap(captureCanvas, boxMetadata)
-        
-
-        // for(let i = 0; i < AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS; i++){
-        //     this.workers[i].postMessage({ message: WorkerCommand.SCAN_BARCODE, image: images[i] })
-        // }
-        // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images })
-        //    this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
-        //this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0] })
-
-
-        // const canvas = new OffscreenCanvas(img_elem.width, img_elem.height);
-        // const ctx = canvas.getContext('2d')!
-        // ctx.drawImage(img_elem, 0, 0, canvas.width, canvas.height)
-        // const image = canvas.transferToImageBitmap()
-        // console.log("[Image]", image)
-
-//        const image = ctx.getImageData(0,0,canvas.width, canvas.height)
-        
-        // this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image], angles:[0] }, [image])
-//        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image], angles:[0] })
-
-
-        // this.controllerCanvasRef.current!.width = this.overlayWidth
-        // this.controllerCanvasRef.current!.height = this.overlayHeight
-        // const ctx = this.controllerCanvasRef.current!.getContext('2d')!
-        // ctx.putImageData(image, 0, 0, 0, 0, image.width, image.height)
-        // ctx.fillText("AAAAAAAAAAAAAAAAAAAAAAAAAAa",100,100)
-        // console.log(">>>>>", this.controllerCanvasRef.current!.width, this.controllerCanvasRef.current!.height, image.width, image.height)
-
-
         const t_canvas1 = new OffscreenCanvas(img_elem1.width, img_elem1.height)
         const t_ctx1 = t_canvas1.getContext("2d")!
         t_ctx1.drawImage(img_elem1, 0, 0, img_elem1.width, img_elem1.height)
@@ -271,7 +244,6 @@ class App extends React.Component {
         const t_ctx2 = t_canvas2.getContext("2d")!
         t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
         const image2 = t_canvas2.transferToImageBitmap()
-        
         this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1,image2], angles:[0] }, [image1, image2])
 
         captureCanvas.remove()
