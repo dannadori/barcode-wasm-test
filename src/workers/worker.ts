@@ -187,9 +187,13 @@ export const scanBarcode_old = (image: ImageData, angle: number[]): string => {
     overlay!.height = image.height
     console.log("aaaklgakagkj", image.width, image.height, overlay, overlay!.width, overlay!.height)
     const ctx2 = overlay!.getContext('2d')!
-    ctx2.putImageData(image, 200,200)
+    ctx2.putImageData(image, 10,10)
     ctx2.fillText("ADFASDFFSADF",100,100)
     console.log("sample wrote")
+
+    // ctx2.putImageData(imageData, 110,10)
+    // ctx2.fillText("ADFASDFFSADF",200,200)
+    // console.log("sample wrote2")
 
     return barcode
 }

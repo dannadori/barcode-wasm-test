@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig } from '../const';
+import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus } from '../const';
 import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
 import { ToastProvider, useToasts } from 'react-toast-notifications'
@@ -30,8 +30,9 @@ class App extends React.Component {
     // HTML Component //
     ////////////////////
     parentRef = React.createRef<HTMLDivElement>()
-    imageRef = React.createRef<HTMLImageElement>()
-    videoRef = React.createRef<HTMLVideoElement>()
+    imageRef1 = React.createRef<HTMLImageElement>()
+    imageRef2 = React.createRef<HTMLImageElement>()
+    videoRef  = React.createRef<HTMLVideoElement>()
     controllerCanvasRef = React.createRef<HTMLCanvasElement>()
     workerMonitorCanvasRef = React.createRef<HTMLCanvasElement>()
     ////////////////////
@@ -92,11 +93,13 @@ class App extends React.Component {
                         }
                     } )
                     if(i === 0){
-                        window.requestAnimationFrame(this.execMainLoop);
+                        //window.requestAnimationFrame(this.execMainLoop);
+                        props.initialized()
                     }
                 }else if (event.data.message === WorkerResponse.NOT_PREPARED){
                     if(i === 0){
-                        window.requestAnimationFrame(this.execMainLoop);
+                        props.initialized()
+                        //window.requestAnimationFrame(this.execMainLoop);
                     }
                 }
             }
@@ -161,11 +164,12 @@ class App extends React.Component {
                     });
                 });
 
-
+            
+            
             Promise.all([initWorkerPromise, webCamPromise])
                 .then((res) => {
                     console.log('Camera and model ready!')
-                    this.execMainLoop()
+                    //this.execMainLoop()
                     props.initialized()
                 })
                 .catch(error => {
@@ -192,15 +196,17 @@ class App extends React.Component {
 
     requestScanBarcode = async () => {
         const props = this.props as any
+        const gs = this.props as GlobalState
         console.log('requestScanBarcode')
         const video = this.videoRef.current!
         const controller = this.controllerCanvasRef.current!
         controller.width = this.overlayWidth
         controller.height = this.overlayHeight
 
-        const img_elem = this.imageRef.current!
+        const img_elem1 = this.imageRef1.current!
+        const img_elem2 = this.imageRef2.current!
 
-        
+
         
 
         if(video.width === 0 || video.height === 0){ // Videoが準備されていない場合スキップ
@@ -210,6 +216,10 @@ class App extends React.Component {
             window.requestAnimationFrame(this.execMainLoop);
         }
 
+        if(this.load === false || gs.counter <20){
+            window.requestAnimationFrame(this.execMainLoop);
+
+        }
         // drawGrid(controller, 100)
 
         console.log(video.width, video.height, this.overlayWidth ,this.overlayHeight)
@@ -217,7 +227,7 @@ class App extends React.Component {
         const boxMetadata = splitCanvasToBoxes(captureCanvas)
         drawBoxGrid(controller, boxMetadata)
 
-        const images = getBoxImages(captureCanvas, boxMetadata)
+        //const images = getBoxImages(captureCanvas, boxMetadata)
         //this.drawBoxSampleImage(controller, images[5])
 
 
@@ -252,26 +262,48 @@ class App extends React.Component {
         // console.log(">>>>>", this.controllerCanvasRef.current!.width, this.controllerCanvasRef.current!.height, image.width, image.height)
 
 
-        const t_canvas = document.createElement("canvas")
-        const t_ctx = t_canvas.getContext("2d")!
-        t_ctx.drawImage(img_elem, 0, 0, img_elem.width, img_elem.height)
+        const t_canvas1 = document.createElement("canvas")
+        const t_ctx1 = t_canvas1.getContext("2d")!
+        t_canvas1.width  = img_elem1.width
+        t_canvas1.height = img_elem1.height
+        t_ctx1.drawImage(img_elem1, 0, 0, img_elem1.width, img_elem1.height)
         // const image = t_canvas.transferToImageBitmap()
-        const image = t_ctx.getImageData(0, 0, img_elem.width, img_elem.height)
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image], angles:[0] })
+        const image1 = t_ctx1.getImageData(0, 0, img_elem1.width, img_elem1.height)
+
+        // const t_canvas2 = document.createElement("canvas")
+        // const t_ctx2 = t_canvas2.getContext("2d")!
+        // t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
+        // // const image = t_canvas.transferToImageBitmap()
+        // const image2 = t_ctx2.getImageData(0, 0, img_elem2.width, img_elem2.height)
+
+        
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1], angles:[0] })
 
         captureCanvas.remove()
 
     }
 
+    load = false
+    loaded = ()=>{
+        this.load = true
+        console.log("image loaded")
+    }
     render() {
         const gs = this.props as GlobalState
         const props = this.props as any
         const video = this.videoRef.current!
 
 
+        if(gs.status === AppStatus.INITIALIZED){
+            console.log('initialized')
+            this.checkParentSizeChanged(video)
+            this.requestScanBarcode()
+        }
+        
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
-                <img src={gs.img_src} alt="barcode" ref={this.imageRef} />
+                <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} onLoad={()=>this.loaded()}/>
+                {/* <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef1} /> */}
                 <video
                     autoPlay
                     playsInline
