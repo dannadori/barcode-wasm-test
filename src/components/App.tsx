@@ -262,22 +262,17 @@ class App extends React.Component {
         // console.log(">>>>>", this.controllerCanvasRef.current!.width, this.controllerCanvasRef.current!.height, image.width, image.height)
 
 
-        const t_canvas1 = document.createElement("canvas")
+        const t_canvas1 = new OffscreenCanvas(img_elem1.width, img_elem1.height)
         const t_ctx1 = t_canvas1.getContext("2d")!
-        t_canvas1.width  = img_elem1.width
-        t_canvas1.height = img_elem1.height
         t_ctx1.drawImage(img_elem1, 0, 0, img_elem1.width, img_elem1.height)
-        // const image = t_canvas.transferToImageBitmap()
-        const image1 = t_ctx1.getImageData(0, 0, img_elem1.width, img_elem1.height)
+        const image1 = t_canvas1.transferToImageBitmap()
 
-        const t_canvas2 = document.createElement("canvas")
+        const t_canvas2 = new OffscreenCanvas(img_elem2.width, img_elem2.height)
         const t_ctx2 = t_canvas2.getContext("2d")!
         t_ctx2.drawImage(img_elem2, 0, 0, img_elem2.width, img_elem2.height)
-        // const image = t_canvas.transferToImageBitmap()
-        const image2 = t_ctx2.getImageData(0, 0, img_elem2.width, img_elem2.height)
-
+        const image2 = t_canvas2.transferToImageBitmap()
         
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1,image2], angles:[0] })
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [image1,image2], angles:[0] }, [image1, image2])
 
         captureCanvas.remove()
 

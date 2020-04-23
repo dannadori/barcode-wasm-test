@@ -167,13 +167,13 @@ let overlay: OffscreenCanvas | null = null
 //     return barcode
 // }
 
-export const scanBarcode_old = (image: ImageData, angle: number[]): string => {
+export const scanBarcode_old = (image: ImageBitmap, angle: number[]): string => {
     barcode = ""
 
     console.log("start scan")
     const canvas = new OffscreenCanvas(image.width, image.height)
     const ctx = canvas.getContext('2d')!
-    ctx.putImageData(image, 0, 0)
+    ctx.drawImage(image, 0, 0)
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const idd = imageData.data;
     const input = zxing_asm._resize(canvas.width, canvas.height);
@@ -183,13 +183,13 @@ export const scanBarcode_old = (image: ImageData, angle: number[]): string => {
     const err = zxing_asm._decode_multi(decodePtr);
     console.log("end scan,", + err)
 
-    overlay!.width  = image.width
-    overlay!.height = image.height
-    console.log("aaaklgakagkj", image.width, image.height, overlay, overlay!.width, overlay!.height)
-    const ctx2 = overlay!.getContext('2d')!
-    ctx2.putImageData(image, 10,10)
-    ctx2.fillText("ADFASDFFSADF",100,100)
-    console.log("sample wrote")
+    // overlay!.width  = image.width
+    // overlay!.height = image.height
+    // console.log("aaaklgakagkj", image.width, image.height, overlay, overlay!.width, overlay!.height)
+    // const ctx2 = overlay!.getContext('2d')!
+    // ctx2.putImageData(image, 10,10)
+    // ctx2.fillText("ADFASDFFSADF",100,100)
+    // console.log("sample wrote")
 
     // ctx2.putImageData(imageData, 110,10)
     // ctx2.fillText("ADFASDFFSADF",200,200)
@@ -209,7 +209,7 @@ onmessage = (event) => {
         const height = event.data.height
         const angles = event.data.angles
 //        const images: ImageBitmap[] = event.data.images
-        const images: ImageData[] = event.data.images
+        const images: ImageBitmap[] = event.data.images
         //        const image = event.data.image
         if (init_zxing === false || init_cv === false) {
             console.log("not yet")
