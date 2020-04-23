@@ -175,10 +175,11 @@ class App extends React.Component {
             this.checkParentSizeChanged(video, props)
             this.requestScanBarcode()
         }
-
+        
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
-                <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef} />
+                <img src="imgs/barcode_n03.png" alt="barcode" ref={this.imageRef} />
+                {/* <img src="imgs/barcode_n03.png" alt="barcode" ref={this.imageRef} /> */}
                 <video
                     autoPlay
                     playsInline
