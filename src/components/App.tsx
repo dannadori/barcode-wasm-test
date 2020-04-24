@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
 import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus } from '../const';
-import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages } from '../AI/PreProcessing';
+import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages, SplitCanvasMetaData } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
 import { ToastProvider, useToasts } from 'react-toast-notifications'
 
@@ -33,6 +33,7 @@ class App extends React.Component {
     imageRef1 = React.createRef<HTMLImageElement>()
     imageRef2 = React.createRef<HTMLImageElement>()
     videoRef  = React.createRef<HTMLVideoElement>()
+    barcodeDisplayCanvasRef = React.createRef<HTMLCanvasElement>()
     controllerCanvasRef = React.createRef<HTMLCanvasElement>()
     workerMonitorCanvasRef = React.createRef<HTMLCanvasElement>()
     ////////////////////
@@ -84,15 +85,41 @@ class App extends React.Component {
             console.log("Worker initializing... ",i)
             const worker = new Worker('../workers/worker.ts', { type: 'module' })
             worker.onmessage = (event) => {
-                const props = this.props as any
+
+                const barcodeDisplay = this.barcodeDisplayCanvasRef.current!
+
+                const ctx = barcodeDisplay.getContext("2d")!
+
+                ctx.strokeStyle  = "#DD3333FF";
+                ctx.lineWidth    = 1;
+                const font       = "16px sans-serif";
+                ctx.font         = font;
+                ctx.textBaseline = "top";
+                ctx.fillStyle = "#DD3333FF";
+                ctx.clearRect(0,0,barcodeDisplay.width,barcodeDisplay.height)
+
+
                 if (event.data.message === WorkerResponse.SCANED_BARCODE) {
-                    console.log(event)
+                    console.log("RECEIVED:",event)
+                    const boxMetadata:SplitCanvasMetaData[] = event.data.boxMetadata
                     const barcodes:string[] = event.data.barcodes
-                    barcodes.map((x) =>{
-                        if(x !== ""){
-                            console.log(`BARCODE[worker${i}]: `, x)
+                    const point_xs:number[] = event.data.point_xs
+                    const point_ys:number[] = event.data.point_ys
+                    
+                    const box_num = boxMetadata.length
+                    for(let j=0; j<box_num; j++){
+                        const barcode = barcodes[j]
+                        if(barcode !== ""){
+                            const metadata = boxMetadata[j]
+                            const box_offset_x = barcodeDisplay.width * metadata.minX
+                            const box_offset_y = barcodeDisplay.height * metadata.minY
+                            const point_offset_x = AIConfig.TRANSFORMED_MAX * point_xs[j]
+                            const point_offset_y = AIConfig.TRANSFORMED_MAX * point_ys[j]
+                            ctx.fillRect(box_offset_x+point_offset_x, box_offset_y+point_offset_y, 10, 10)
+                            ctx.fillText(barcode, box_offset_x+point_offset_x+15, box_offset_y+point_offset_y,)
                         }
-                    } )
+                    }
+
                     if(i === 0){
                         window.requestAnimationFrame(this.execMainLoop);
                         // props.initialized()
@@ -104,9 +131,9 @@ class App extends React.Component {
                     }
                 }
             }
-            // const overlay = this.workerMonitorCanvasRef.current!
-            // const overlay_offscreen= overlay.transferControlToOffscreen()
-            // worker.postMessage({message:WorkerCommand.SET_OVERLAY, overlay:overlay_offscreen},[overlay_offscreen])
+            const overlay = this.workerMonitorCanvasRef.current!
+            const overlay_offscreen= overlay.transferControlToOffscreen()
+            worker.postMessage({message:WorkerCommand.SET_OVERLAY, overlay:overlay_offscreen},[overlay_offscreen])
             this.workers.push(worker)
         }
         return
@@ -243,7 +270,7 @@ class App extends React.Component {
         // for(let i = 0; i < AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS; i++){
         //     this.workers[i].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [images[i]], angles:[0, 90, 5, 85] }, [images[i]])
         // }
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: images, angles:[0, 90, 5, 85] }, images)
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: boxMetadata, images: images, angles:[0, 90, 45] }, images)
 
 
         // ///////////////////////////////
@@ -287,7 +314,7 @@ class App extends React.Component {
         const ctx3 = offscreen.getContext("2d")!
         ctx3.putImageData(image,0,0)
         const input = offscreen.transferToImageBitmap()
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [input], angles:[0, 90, 5, 85] }, [input])
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [input], angles:[0, 90, 45] }, [input])
         
     }
 
@@ -334,6 +361,13 @@ class App extends React.Component {
                     width = {this.overlayWidth}
                     height = {this.overlayHeight}
                 />
+                <canvas
+                    ref={this.barcodeDisplayCanvasRef}
+                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, }}
+                    width={this.overlayWidth}
+                    height={this.overlayHeight}
+                />
+
                 <canvas
                     ref={this.controllerCanvasRef}
                     style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, }}

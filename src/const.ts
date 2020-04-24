@@ -9,14 +9,15 @@ export const AppStatus = {
 
 export const AIConfig = {
     SPLIT_COLS: 3,
-    SPLIT_ROWS: 2,
+    SPLIT_ROWS: 3,
     // SPLIT_COLS: 2,
     // SPLIT_ROWS: 4,
     SPLIT_MERGIN: 0.2,
     SPLIT_WIDTH: 300,
     SPLIT_HEIGHT: 300,
-    TRANSFORMED_WIDTH: 400,
-    TRANSFORMED_HEIGHT: 400,
+    TRANSFORMED_WIDTH: 300,
+    TRANSFORMED_HEIGHT: 300,
+    TRANSFORMED_MAX: 300,
     CROP_MARGIN: 20,
 
     SS_MODEL_PATH: '/WEB_MODEL/icnet_0300x0300_0.10/model.json',
