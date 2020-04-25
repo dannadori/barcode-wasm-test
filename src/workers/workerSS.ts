@@ -20,9 +20,12 @@ onmessage = async (event) => {
   if(event.data.message === WorkerCommand.PREDICT_AREA){
     console.log("requested predict area")
     const boxMetadata = event.data.boxMetadata
-    const images = event.data.images
+    const images:ImageBitmap[] = event.data.images
     const maskParts = await predictByImageBitmaps(model!, images)
     ctx.postMessage({message:WorkerResponse.PREDICTED_AREA, maskParts:maskParts, boxMetadata:boxMetadata})
+    for(let i =0;i<images.length;i++){
+      images[i].close()
+    }
   }
 } 
 

@@ -56,8 +56,6 @@ decodePtr = zxing_asm.addFunction(decodeCallback, 'iiiiiffffffff');
 
 export const drawCountours = (mask: ImageData): number[][] => {
   const mask_src = cv_asm.matFromImageData(mask)
-  let l = cv_asm.LINE_8
-  let dst = cv_asm.Mat.zeros(mask_src.rows, mask_src.cols, cv_asm.CV_8UC4);
 
   // 輪郭検出
   cv_asm.cvtColor(mask_src, mask_src, cv_asm.COLOR_RGBA2GRAY, 0); // そもそもグレースケールなのでおそらく意味がない。
@@ -92,7 +90,6 @@ export const drawCountours = (mask: ImageData): number[][] => {
     // 回転矩形の4点取得(minimumArea)　≒最小エリア
     let rotatedRect = cv_asm.minAreaRect(contours.get(i));
     let vertices = cv_asm.RotatedRect.points(rotatedRect);
-    let color3 = new cv_asm.Scalar(255, 0, 255, 255);
 
 
     // // 回転矩形の描画
@@ -139,6 +136,7 @@ export const drawCountours = (mask: ImageData): number[][] => {
     bottom[0].x / mask.width, bottom[0].y / mask.height, bottom[1].x / mask.width, bottom[1].y / mask.height]
     detectedAreas.push(src_pers)
   }
+  mask_src.delete()
   return detectedAreas
 }
 
@@ -215,6 +213,7 @@ export const rotateImageByCV = (img: ImageData, angle: number): ImageData => {
   const imgData = new ImageData(new Uint8ClampedArray(dst.data), dst.cols, dst.rows)
   dst.delete();
   src.delete();
+  M.delete()
   // dsize.delete();
   // center.delete();
   return imgData
@@ -251,7 +250,8 @@ export const scanBarcodes = (images: ImageData[]): string[] => {
   const result = []
   let image_num = images.length  
   for(let i = 0; i < image_num; i++){
-    const barcode = scanBarcode(images[i], [0, 90, 85, 5])
+//    const barcode = scanBarcode(images[i], [0, 90, 85, 5])
+    const barcode = scanBarcode(images[i], [0, 90])
     result.push(barcode)
   }
   return result
@@ -265,7 +265,6 @@ onmessage = (event) => {
   console.log(event)
 
   if (event.data.message === WorkerCommand.SCAN_BARCODES) { // バグ作り込む原因。リファクタ。(SCAN_BARCODEとSCAN_BARCODESがある)
-    console.log('---------WorkerCV_message---------222')
     const videoBitmap: ImageBitmap = event.data.videoBitmap
     const maskBitmap: ImageBitmap = event.data.maskBitmap
 
@@ -293,6 +292,8 @@ onmessage = (event) => {
     const barcodes = scanBarcodes(transformedImages)
 
     ctx.postMessage({message:WorkerResponse.SCANNED_BARCODES, barcodes:barcodes, areas:areas})
+    videoBitmap.close()
+    maskBitmap.close()
   }
 };
 

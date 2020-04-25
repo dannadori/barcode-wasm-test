@@ -88,6 +88,7 @@ class BarcodeTFApp extends React.Component {
         areaCV.width  = this.overlayWidth
         areaCV.height = this.overlayHeight
         const ctx2 = areaCV.getContext("2d")!
+        ctx2.clearRect(0, 0, areaCV.width, areaCV.height)
         ctx2.strokeStyle  = "#DD3333FF";
         ctx2.lineWidth    = 1;
         const font       = "16px sans-serif";
@@ -100,12 +101,12 @@ class BarcodeTFApp extends React.Component {
         ctx2.beginPath();
         for(let i = 0; i < area_num; i ++){
             const area = areas[i]
-            ctx2.moveTo(area[0] * areaCV.width, area[1] * areaCV.height)
-            ctx2.lineTo(area[2] * areaCV.width, area[3] * areaCV.height)
-            ctx2.lineTo(area[6] * areaCV.width, area[7] * areaCV.height)
-            ctx2.lineTo(area[4] * areaCV.width, area[5] * areaCV.height)
-            ctx2.lineTo(area[0] * areaCV.width, area[1] * areaCV.height)
-            ctx2.stroke();
+            // ctx2.moveTo(area[0] * areaCV.width, area[1] * areaCV.height)
+            // ctx2.lineTo(area[2] * areaCV.width, area[3] * areaCV.height)
+            // ctx2.lineTo(area[6] * areaCV.width, area[7] * areaCV.height)
+            // ctx2.lineTo(area[4] * areaCV.width, area[5] * areaCV.height)
+            // ctx2.lineTo(area[0] * areaCV.width, area[1] * areaCV.height)
+            // ctx2.stroke();
             ctx2.fillText(barcodes[i], area[0] * areaCV.width, area[1] * areaCV.height)
         }
         ctx2.closePath();
