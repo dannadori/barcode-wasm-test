@@ -36,6 +36,7 @@ export const predictByImageBitmaps = async (model:tf.GraphModel, bms:ImageBitmap
 
         // console.log('Prediction is done. Map drawing...')
         mapDatas = await res.array() as number[][][]
+        res.dispose()
     }, false)
 
     return mapDatas!
