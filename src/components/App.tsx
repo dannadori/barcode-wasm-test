@@ -7,23 +7,6 @@ import { ToastProvider, useToasts } from 'react-toast-notifications'
 
 
 
-const FormWithToasts = ({ ...props }) => {
-    const { addToast } = useToasts()
-    const barcode = props.barcode
-    // console.log("toast!!!! ", props, barcode)
-    const toast = () => {
-        console.log("!!!!!!!!!!!!!!!!!!!! TOAST")
-        addToast('Saved Successfully', { appearance: 'success' })
-    }
-    if (barcode === "") {
-        return <div >...</div>
-
-    } else {
-        addToast("AAAAABBB", { appearance: 'success' })
-        return <div onLoad={() => toast()}   >!!!!</div>
-    }
-}
-
 
 class App extends React.Component {
     ////////////////////
@@ -405,9 +388,6 @@ class App extends React.Component {
                     height={this.overlayHeight}
                 />
 
-                <ToastProvider>
-                    <FormWithToasts {...props} />
-                </ToastProvider>
             </div>
         )
     }
