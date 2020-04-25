@@ -85,7 +85,8 @@ export const scanBarcode_old = (image: ImageBitmap, angle: number[]): string => 
             const idd = rotatedData.data;
             const input = zxing_asm._resize(rotatedData.width, rotatedData.height);
             for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
-                zxing_asm.HEAPU8[input + j] = idd[i];
+                //zxing_asm.HEAPU8[input + j] = idd[i]; // これだと"R"しか見ていないのでは？
+                zxing_asm.HEAPU8[input + j] = 0.2989 * idd[i + 0] + 0.5870 * idd[i + 1] + 0.1140 * idd[i + 2] //グレースケール 
             }    
             
 
