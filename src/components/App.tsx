@@ -306,6 +306,10 @@ class App extends React.Component {
         const start_yr = (start_y / controller.height) * video.height
         const end_yr   = (end_y / controller.height)   * video.height
 
+        if((end_xr - start_xr < 1) ||  (end_yr - start_yr < 1)){ // 選択範囲が小さい場合。瞬間的なタップなど。
+            return 
+        }
+
         const captureCanvas = captureVideoImageToCanvas(video)
         const ctx = captureCanvas.getContext("2d")!
         const image = ctx.getImageData(start_xr, start_yr, end_xr - start_xr, end_yr - start_yr)
