@@ -4,8 +4,15 @@ export const AppStatus = {
     INITIALIZING: "initializing",
     INITIALIZED : "initialized",
     RUNNING     : "running",
-
 }
+
+export const AppModes={
+    AUTO: "auto",
+    CROP: "crop",
+}
+
+export const AppMode = AppModes.CROP
+//export const AppMode = AppModes.AUTO
 
 export const AIConfig = {
     SPLIT_COLS: 3,
@@ -21,7 +28,6 @@ export const AIConfig = {
     CROP_MARGIN: 20,
 
     SS_MODEL_PATH: '/WEB_MODEL/icnet_0300x0300_0.10/model.json',
-
 }
 
 

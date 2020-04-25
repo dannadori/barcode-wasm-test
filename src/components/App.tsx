@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus } from '../const';
+import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus, AppMode, AppModes } from '../const';
 import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages, SplitCanvasMetaData } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
 import { ToastProvider, useToasts } from 'react-toast-notifications'
@@ -121,13 +121,15 @@ class App extends React.Component {
                     }
 
                     if(i === 0){
-                        window.requestAnimationFrame(this.execMainLoop);
-                        // props.initialized()
+                        if(AppMode == AppModes.AUTO){
+                            window.requestAnimationFrame(this.execMainLoop);
+                        }
                     }
                 }else if (event.data.message === WorkerResponse.NOT_PREPARED){
                     if(i === 0){
-                        // props.initialized()
-                        window.requestAnimationFrame(this.execMainLoop);
+                        if(AppMode == AppModes.AUTO){
+                            window.requestAnimationFrame(this.execMainLoop);
+                        }
                     }
                 }
             }
@@ -207,18 +209,20 @@ class App extends React.Component {
         }
 
 
-        // this.controllerCanvasRef.current!.addEventListener("touchstart", (e)=>{
-        //     e.preventDefault(); 
-        //     props.startSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-        // }, { passive: false })
-        // this.controllerCanvasRef.current!.addEventListener("touchmove", (e)=>{
-        //     e.preventDefault(); 
-        //     props.moveSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-        // }, { passive: false })
-        // this.controllerCanvasRef.current!.addEventListener("touchend", (e)=>{
-        //     e.preventDefault(); 
-        //     props.endSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-        // }, { passive: false })
+        if(AppMode == AppModes.CROP){
+            this.controllerCanvasRef.current!.addEventListener("touchstart", (e)=>{
+                e.preventDefault(); 
+                props.startSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+            }, { passive: false })
+            this.controllerCanvasRef.current!.addEventListener("touchmove", (e)=>{
+                e.preventDefault(); 
+                props.moveSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+            }, { passive: false })
+            this.controllerCanvasRef.current!.addEventListener("touchend", (e)=>{
+                e.preventDefault(); 
+                props.endSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+            }, { passive: false })
+        }
            
     }
 
@@ -306,15 +310,25 @@ class App extends React.Component {
         const ctx = captureCanvas.getContext("2d")!
         const image = ctx.getImageData(start_xr, start_yr, end_xr - start_xr, end_yr - start_yr)
 
-        const ctx2 = controller.getContext("2d")!
-        ctx2.putImageData(image,0,0)
+        // const ctx2 = controller.getContext("2d")!
+        // ctx2.putImageData(image,0,0)
 
 
         const offscreen = new OffscreenCanvas(image.width, image.height)
         const ctx3 = offscreen.getContext("2d")!
         ctx3.putImageData(image,0,0)
         const input = offscreen.transferToImageBitmap()
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [input], angles:[0, 90, 45] }, [input])
+
+
+        let box: SplitCanvasMetaData = {
+            minY: (start_y / controller.height),
+            minX: (start_x / controller.width), // 割合
+            maxY: (end_y   / controller.height), // 割合
+            maxX: (end_x   / controller.width), // 割合
+        }
+
+
+        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: [box], images: [input], angles:[0, 90, 45] }, [input])
         
     }
 
@@ -325,22 +339,34 @@ class App extends React.Component {
         const video = this.videoRef.current!
         const controller = this.controllerCanvasRef.current!
 
+
+
         if(gs.status === AppStatus.INITIALIZED){
             console.log('initialized')
             this.checkParentSizeChanged(video)
-            this.requestScanBarcode()
+            if(AppMode == AppModes.AUTO){
+                this.requestScanBarcode()
+            }
         }
 
-        // if(gs.inSelect===true){
-        //     const ctx = controller.getContext("2d")!
-        //     ctx.clearRect(0, 0, controller.width, controller.height)
-        //     ctx.strokeRect(gs.select_start_x, gs.select_start_y, gs.select_end_x-gs.select_start_x, gs.select_end_y-gs.select_start_y)
-        // }else if(gs.finSelect===true){
-        //     const ctx = controller.getContext("2d")!
-        //     ctx.clearRect(0, 0, controller.width, controller.height)
-        //     console.log("rect selected", gs.select_start_x, gs.select_start_y, gs.select_end_x, gs.select_end_y)
-        //     this.cropRectAndScan(gs.select_start_x, gs.select_start_y, gs.select_end_x, gs.select_end_y)
-        // }
+
+        if(AppMode == AppModes.CROP){
+            if(gs.inSelect===true){
+                const ctx = controller.getContext("2d")!
+                ctx.strokeStyle  = "#DD3333FF";
+                ctx.lineWidth    = 2;
+                
+                ctx.clearRect(0, 0, controller.width, controller.height)
+                ctx.strokeRect(gs.select_start_x, gs.select_start_y, gs.select_end_x-gs.select_start_x, gs.select_end_y-gs.select_start_y)
+            }else if(gs.finSelect===true){
+                const ctx = controller.getContext("2d")!
+                ctx.strokeStyle  = "#DD3333FF";
+                ctx.lineWidth    = 2;
+                ctx.clearRect(0, 0, controller.width, controller.height)
+                console.log("rect selected", gs.select_start_x, gs.select_start_y, gs.select_end_x, gs.select_end_y)
+                this.cropRectAndScan(gs.select_start_x, gs.select_start_y, gs.select_end_x, gs.select_end_y)
+            }
+        }
 
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
@@ -381,19 +407,6 @@ class App extends React.Component {
             </div>
         )
     }
-
-    // selectStart = (e:any) =>{
-    // }
-    // selectMove = (e:any) =>{
-    //     e.preventDefault(); 
-    //     console.log(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-    // }
-
-    // selectEnd = (e:any) =>{
-    //     e.preventDefault(); 
-    //     console.log(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-    // }
-
 
 }
 

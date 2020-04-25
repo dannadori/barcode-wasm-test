@@ -89,19 +89,19 @@ export const scanBarcode_old = (image: ImageBitmap, angle: number[]): string => 
             }    
             
 
-            if(overlay !==null && angle[k] === 45){
-                const tmp_ctx  = canvas_for_overlay?.getContext("2d")!
-                tmp_ctx.clearRect(0, 0, canvas_for_overlay.width, canvas_for_overlay.height)
-                tmp_ctx.putImageData(rotatedData, 0, 0,)
-                const overlay_x=Math.floor(rotatedData.width/3)
-                const overlay_y=Math.floor(rotatedData.height/3)
-                overlay.width  = overlay_x
-                overlay.height = overlay_y
-                const tmp_ctx2 = overlay.getContext("2d")!
-                tmp_ctx2.drawImage(canvas_for_overlay, 0,0,rotatedData.width, rotatedData.height, 0,0, overlay_x, overlay_y)
+            // if(overlay !==null && angle[k] === 45){
+            //     const tmp_ctx  = canvas_for_overlay?.getContext("2d")!
+            //     tmp_ctx.clearRect(0, 0, canvas_for_overlay.width, canvas_for_overlay.height)
+            //     tmp_ctx.putImageData(rotatedData, 0, 0,)
+            //     const overlay_x=Math.floor(rotatedData.width/3)
+            //     const overlay_y=Math.floor(rotatedData.height/3)
+            //     overlay.width  = overlay_x
+            //     overlay.height = overlay_y
+            //     const tmp_ctx2 = overlay.getContext("2d")!
+            //     tmp_ctx2.drawImage(canvas_for_overlay, 0,0,rotatedData.width, rotatedData.height, 0,0, overlay_x, overlay_y)
 
-                console.log("rotate size", rotatedData.width, rotatedData.height, angle[k])
-            }
+            //     console.log("rotate size", rotatedData.width, rotatedData.height, angle[k])
+            // }
             
             
         },false)

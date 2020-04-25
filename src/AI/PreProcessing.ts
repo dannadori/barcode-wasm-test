@@ -6,10 +6,10 @@ export interface SplitCanvasMetaData {
     minY   : number // 画像全体での開始位置Y (ratio)
     maxX   : number // 画像全体での終了位置X (ratio)
     maxY   : number // 画像全体での終了位置Y (ratio)
-    left   : number // 画像全体での開始位置X (座標))
-    top    : number // 画像全体での開始位置Y (座標))
-    right  : number // 画像全体での終了位置X (座標))
-    bottom : number // 画像全体での終了位置Y (座標))
+    // left   : number // 画像全体での開始位置X (座標))
+    // top    : number // 画像全体での開始位置Y (座標))
+    // right  : number // 画像全体での終了位置X (座標))
+    // bottom : number // 画像全体での終了位置Y (座標))
 //    ssmap  : number[][] | null,
 }
 
@@ -66,10 +66,10 @@ export const splitCanvasToBoxes = (originaCanvas: HTMLCanvasElement): SplitCanva
             minX: minX, // 割合
             maxY: maxY, // 割合
             maxX: maxX, // 割合
-            top: originaCanvas.height * minY,
-            left: originaCanvas.width * minX,
-            bottom: originaCanvas.height * maxY,
-            right: originaCanvas.width * maxX,
+            // top: originaCanvas.height * minY,
+            // left: originaCanvas.width * minX,
+            // bottom: originaCanvas.height * maxY,
+            // right: originaCanvas.width * maxX,
 //            ssmap: null,
         }
         //console.log('>>>>>>>>>', minX, minY, maxX, maxY)
