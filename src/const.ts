@@ -8,16 +8,17 @@ export const AppStatus = {
 export const AppModes={
     AUTO: "auto",
     CROP: "crop",
+    AUTO_WITH_TF: "auto_with_tf",
 }
 
-export const AppMode = AppModes.CROP
+export const AppMode = AppModes.AUTO_WITH_TF
 //export const AppMode = AppModes.AUTO
 
 export const AIConfig = {
     // SPLIT_COLS: 1,
     // SPLIT_ROWS: 1,
-    SPLIT_COLS: 3,
-    SPLIT_ROWS: 3,
+    SPLIT_COLS: 2,
+    SPLIT_ROWS: 2,
     SPLIT_MERGIN: 0.2,
     SPLIT_WIDTH: 300,
     SPLIT_HEIGHT: 300,
@@ -31,14 +32,20 @@ export const AIConfig = {
 
 
 export const WorkerCommand = {
-    SET_OVERLAY:  'set_overlay',
-    SCAN_BARCODE: 'scan_barcode',
+    SET_OVERLAY  :  'set_overlay',
+    SCAN_BARCODE : 'scan_barcode',
+    PREDICT_AREA : 'predict_area',
+    DRAW_MASK    : 'draw_mask',
+    SCAN_BARCODES: 'scan_barcodes',
 }
 
 export const WorkerResponse = {
-    NOT_PREPARED   : 'not_prepared',
-    INITIALIZED   : 'initialized',
-    SCANED_BARCODE : 'scaned_barcode',
+    NOT_PREPARED     : 'not_prepared',
+    INITIALIZED      : 'initialized',
+    SCANED_BARCODE   : 'scaned_barcode',
+    PREDICTED_AREA   : 'predicted_area',
+    DREW_MASK        : 'drew_mask',
+    SCANNED_BARCODES : 'scanned_barcodes',
 }
 
 /////////////////////////////

@@ -7,6 +7,8 @@ import createSagaMiddleware from 'redux-saga';
 import rootSaga from './saga';
 import reducer from './reducers';
 import Connector from './containers';
+import ConnectorTF from './containers/indexTF'
+
 import { AppMode, AppModes } from './const';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -24,8 +26,8 @@ ReactDOM.render(
       {(()=>{
         if(AppMode === AppModes.AUTO || AppMode === AppModes.CROP){
           return <Connector />
-        }else{
-
+        }else if(AppMode === AppModes.AUTO_WITH_TF){
+          return <ConnectorTF/>
         }
       })()}
 
