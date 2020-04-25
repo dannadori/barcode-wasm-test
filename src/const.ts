@@ -11,14 +11,14 @@ export const AppModes={
     CROP: "crop",
 }
 
-export const AppMode = AppModes.CROP
-//export const AppMode = AppModes.AUTO
+//export const AppMode = AppModes.CROP
+export const AppMode = AppModes.AUTO
 
 export const AIConfig = {
+    // SPLIT_COLS: 1,
+    // SPLIT_ROWS: 1,
     SPLIT_COLS: 3,
     SPLIT_ROWS: 3,
-    // SPLIT_COLS: 2,
-    // SPLIT_ROWS: 4,
     SPLIT_MERGIN: 0.2,
     SPLIT_WIDTH: 300,
     SPLIT_HEIGHT: 300,

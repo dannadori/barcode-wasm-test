@@ -3,10 +3,6 @@ import { GlobalState } from '../reducers';
 import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus, AppMode, AppModes } from '../const';
 import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages, SplitCanvasMetaData } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
-import { ToastProvider, useToasts } from 'react-toast-notifications'
-
-
-
 
 class App extends React.Component {
     ////////////////////

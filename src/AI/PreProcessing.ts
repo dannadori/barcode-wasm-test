@@ -6,38 +6,15 @@ export interface SplitCanvasMetaData {
     minY   : number // 画像全体での開始位置Y (ratio)
     maxX   : number // 画像全体での終了位置X (ratio)
     maxY   : number // 画像全体での終了位置Y (ratio)
-    // left   : number // 画像全体での開始位置X (座標))
-    // top    : number // 画像全体での開始位置Y (座標))
-    // right  : number // 画像全体での終了位置X (座標))
-    // bottom : number // 画像全体での終了位置Y (座標))
-//    ssmap  : number[][] | null,
 }
 
 
-///export const captureVideoImageToCanvas = (video:HTMLVideoElement, ratio:number, crop_w:number, crop_h:number):HTMLCanvasElement => {
 export const captureVideoImageToCanvas = (video:HTMLVideoElement):HTMLCanvasElement => {
-
     const videoCaptureCanvas    = document.createElement("canvas");
     videoCaptureCanvas.width = video.width
     videoCaptureCanvas.height = video.height
 
-    // const start_x = (video.videoWidth/2) - (crop_w/2)
-    // const end_x   = (video.videoWidth/2) + (crop_w/2)
-    // const start_y = (video.videoHeight/2) - (crop_h/2)
-    // const end_y   = (video.videoHeight/2) + (crop_h/2)
-    // videoCaptureCanvas.width = crop_w
-    // videoCaptureCanvas.height = crop_h
-
-    // if(ratio === -1){
-    //     videoCaptureCanvas.width    = video.videoWidth
-    //     videoCaptureCanvas.height   = video.videoHeight
-    // }else{
-    //     videoCaptureCanvas.width    = video.videoWidth * ratio
-    //     videoCaptureCanvas.height   = video.videoHeight * ratio
-    // }
-
     const tmpCtx                = videoCaptureCanvas.getContext('2d')!
-    //tmpCtx.drawImage(video, 0, 0, videoCaptureCanvas.width, videoCaptureCanvas.height);
     tmpCtx.drawImage(video, 0, 0, videoCaptureCanvas.width, videoCaptureCanvas.height);
     return videoCaptureCanvas
 }
@@ -66,13 +43,7 @@ export const splitCanvasToBoxes = (originaCanvas: HTMLCanvasElement): SplitCanva
             minX: minX, // 割合
             maxY: maxY, // 割合
             maxX: maxX, // 割合
-            // top: originaCanvas.height * minY,
-            // left: originaCanvas.width * minX,
-            // bottom: originaCanvas.height * maxY,
-            // right: originaCanvas.width * maxX,
-//            ssmap: null,
         }
-        //console.log('>>>>>>>>>', minX, minY, maxX, maxY)
         resultBoxes.push(box)
     }
     return resultBoxes
