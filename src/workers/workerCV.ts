@@ -135,27 +135,32 @@ export const drawCountours = (mask: ImageData): number[][] => {
     src_pers = [tops[0].x / mask.width, tops[0].y / mask.height, tops[1].x / mask.width, tops[1].y / mask.height,
     bottom[0].x / mask.width, bottom[0].y / mask.height, bottom[1].x / mask.width, bottom[1].y / mask.height]
     detectedAreas.push(src_pers)
+
+    rotatedRect = null
+    vertices = null
   }
+  hierarchy.delete()
+  contours.delete()
   mask_src.delete()
   return detectedAreas
 }
 
 
 
-export const transform = (video_img:ImageData, areas:number[][]):ImageData[] =>{
-  const transformed_width  = AIConfig.SPLIT_WIDTH
+export const transform = (video_img: ImageData, areas: number[][]): ImageData[] => {
+  const transformed_width = AIConfig.SPLIT_WIDTH
   const transformed_height = AIConfig.SPLIT_HEIGHT
   console.log("--- areas ---", areas)
   const area_num = areas.length
-  const video_src = cv_asm.matFromImageData(video_img) 
+  const video_src = cv_asm.matFromImageData(video_img)
   console.log("VIDEO SIZE4: ", video_img.width, video_img.height)
   const transformedImages = []
-  for(let i=0;i<area_num;i++){
-    const src_pers = areas[i].map((x:number, index:number)=>{
-      if(index%2==0){
-        return Math.floor(x*video_img.width)
-      }else{
-        return Math.floor(x*video_img.height)
+  for (let i = 0; i < area_num; i++) {
+    const src_pers = areas[i].map((x: number, index: number) => {
+      if (index % 2 == 0) {
+        return Math.floor(x * video_img.width)
+      } else {
+        return Math.floor(x * video_img.height)
       }
     })
     const dst_pers = [0, 0, transformed_width, 0, 0, transformed_height, transformed_width, transformed_height]
@@ -224,23 +229,23 @@ export const rotateImageByCV = (img: ImageData, angle: number): ImageData => {
 export const scanBarcode = (image: ImageData, angle: number[]): string => {
   barcode = ""
 
-  for(let k=0; k<angle.length; k++){
-      with_time("ONE SCAN BARCODE TIME 1: " + angle[k], () => {
-          const rotatedData = rotateImageByCV(image, angle[k])
-          const idd = rotatedData.data;
-          const input = zxing_asm._resize(rotatedData.width, rotatedData.height);
-          for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
-              zxing_asm.HEAPU8[input + j] = 0.2989 * idd[i + 0] + 0.5870 * idd[i + 1] + 0.1140 * idd[i + 2]
-          }    
-          
-      },false)
-      const err = zxing_asm._decode_ean13(decodePtr);
-      if (barcode !== ""){
-          return barcode
+  for (let k = 0; k < angle.length; k++) {
+    with_time("ONE SCAN BARCODE TIME 1: " + angle[k], () => {
+      const rotatedData = rotateImageByCV(image, angle[k])
+      const idd = rotatedData.data;
+      const input = zxing_asm._resize(rotatedData.width, rotatedData.height);
+      for (let i = 0, j = 0; i < idd.length; i += 4, j++) {
+        zxing_asm.HEAPU8[input + j] = 0.2989 * idd[i + 0] + 0.5870 * idd[i + 1] + 0.1140 * idd[i + 2]
       }
+
+    }, false)
+    const err = zxing_asm._decode_ean13(decodePtr);
+    if (barcode !== "") {
+      return barcode
+    }
   }
 
-  
+
   return barcode
 }
 
@@ -248,9 +253,9 @@ export const scanBarcode = (image: ImageData, angle: number[]): string => {
 
 export const scanBarcodes = (images: ImageData[]): string[] => {
   const result = []
-  let image_num = images.length  
-  for(let i = 0; i < image_num; i++){
-//    const barcode = scanBarcode(images[i], [0, 90, 85, 5])
+  let image_num = images.length
+  for (let i = 0; i < image_num; i++) {
+    //    const barcode = scanBarcode(images[i], [0, 90, 85, 5])
     const barcode = scanBarcode(images[i], [0, 90])
     result.push(barcode)
   }
@@ -291,7 +296,8 @@ onmessage = (event) => {
     // バーコードスキャン
     const barcodes = scanBarcodes(transformedImages)
 
-    ctx.postMessage({message:WorkerResponse.SCANNED_BARCODES, barcodes:barcodes, areas:areas})
+    ctx.postMessage({ message: WorkerResponse.SCANNED_BARCODES, barcodes: barcodes, areas: areas })
+
     videoBitmap.close()
     maskBitmap.close()
   }

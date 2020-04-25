@@ -23,9 +23,11 @@ onmessage = async (event) => {
     const images:ImageBitmap[] = event.data.images
     const maskParts = await predictByImageBitmaps(model!, images)
     ctx.postMessage({message:WorkerResponse.PREDICTED_AREA, maskParts:maskParts, boxMetadata:boxMetadata})
+
     for(let i =0;i<images.length;i++){
       images[i].close()
     }
+    event.data.boxMetadata = null
   }
 } 
 

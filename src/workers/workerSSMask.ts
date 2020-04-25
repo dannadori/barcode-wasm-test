@@ -18,6 +18,8 @@ onmessage = async (event) => {
       mask_img = drawMask(boxMetadata, maskParts)
     }, false)
     ctx.postMessage({message:WorkerResponse.DREW_MASK, mask_img:mask_img!})
+    event.data.maskParts   = null
+    event.data.boxMetadata = null
   }
 };
 

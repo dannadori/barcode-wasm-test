@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus, AppMode, AppModes } from '../const';
-import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, SplitCanvasMetaData } from '../AI/PreProcessing';
+import { WorkerResponse, DisplayConstraint, WorkerCommand,AppStatus } from '../const';
+import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
-import { worker } from 'cluster';
+
 
 class BarcodeTFApp extends React.Component {
     ////////////////////
@@ -129,13 +129,16 @@ class BarcodeTFApp extends React.Component {
             }else if(event.data.message === WorkerResponse.PREDICTED_AREA){
                 console.log("MASK PREDICTED", event)
                 this.working_video_img = this.video_img //再キャプチャの前に処理中のimageをバックアップ
+
                 // 再キャプチャ
                 this.requestScanBarcode()
 
-                // マスク作成
+                // // マスク作成
                 const maskParts   = event.data.maskParts
                 const boxMetadata = event.data.boxMetadata
                 this.workerSSMask!.postMessage({ message: WorkerCommand.DRAW_MASK, boxMetadata: boxMetadata,maskParts: maskParts})
+                event.data.maskParts   = null // メモリリーク予防。（これをやらないとリークするようだ。）
+                event.data.boxMetadata = null // メモリリーク予防。（これをやらないとリークするようだ。）
             }
         }
 
@@ -156,8 +159,8 @@ class BarcodeTFApp extends React.Component {
                 maskOffscreen.getContext("2d")!.putImageData(maskImage, 0, 0)
                 const maskBitmap = maskOffscreen.transferToImageBitmap()
 
-                console.log("worker_CV_Calling!!")
                 this.workerCV!.postMessage({ message: WorkerCommand.SCAN_BARCODES, videoBitmap: videoBitmap, maskBitmap:maskBitmap}, [videoBitmap, maskBitmap])
+                event.data.mask_img = null
             }
         }
 
@@ -173,6 +176,8 @@ class BarcodeTFApp extends React.Component {
                 const areas    = event.data.areas
                 console.log("SCANNED_BARCODES", areas, barcodes)
                 this.previewAreas(areas, barcodes)
+                event.data.barcodes = null
+                event.data.areas    = null
             }
         }
 
@@ -264,7 +269,7 @@ class BarcodeTFApp extends React.Component {
         // }
 
         const captureCanvas = captureVideoImageToCanvas(video)
-        const boxMetadata = splitCanvasToBoxes(captureCanvas)
+        const boxMetadata   = splitCanvasToBoxes(captureCanvas)
         //drawBoxGrid(controller, boxMetadata)
 
         const images = getBoxImageBitmap(captureCanvas, boxMetadata)
@@ -279,7 +284,6 @@ class BarcodeTFApp extends React.Component {
     render() {
         const gs = this.props as GlobalState
         const video = this.videoRef.current!
-        const controller = this.controllerCanvasRef.current!
 
 
 
