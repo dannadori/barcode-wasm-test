@@ -102,11 +102,11 @@ class BarcodeApp extends React.Component {
                         }
                     }
     
-                    if(AppMode == AppModes.AUTO){
+                    if(AppMode === AppModes.AUTO){
                         window.requestAnimationFrame(this.execMainLoop);
                     }
                 }else if (event.data.message === WorkerResponse.NOT_PREPARED){
-                    if(AppMode == AppModes.AUTO){
+                    if(AppMode === AppModes.AUTO){
                         window.requestAnimationFrame(this.execMainLoop);
                     }
                 }
@@ -328,7 +328,7 @@ class BarcodeApp extends React.Component {
         }
 
 
-        if(AppMode == AppModes.CROP){
+        if(AppMode === AppModes.CROP && gs.status === AppStatus.INITIALIZED){
             this.checkParentSizeChanged(video)
             if(gs.inSelect===true){
                 const ctx = controller.getContext("2d")!

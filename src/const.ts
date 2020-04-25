@@ -10,8 +10,8 @@ export const AppModes={
     CROP: "crop",
 }
 
-//export const AppMode = AppModes.CROP
-export const AppMode = AppModes.AUTO
+export const AppMode = AppModes.CROP
+//export const AppMode = AppModes.AUTO
 
 export const AIConfig = {
     // SPLIT_COLS: 1,

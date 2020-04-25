@@ -22,8 +22,7 @@ sagaMiddleware.run(rootSaga);
 ReactDOM.render(
     <Provider store={store}>
       {(()=>{
-        console.log("RENDLER")
-        if(AppMode == AppModes.AUTO || AppMode == AppModes.CROP){
+        if(AppMode === AppModes.AUTO || AppMode === AppModes.CROP){
           return <Connector />
         }else{
 
