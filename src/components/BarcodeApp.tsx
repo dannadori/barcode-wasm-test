@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
 import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus, AppMode, AppModes } from '../const';
-import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages, SplitCanvasMetaData } from '../AI/PreProcessing';
+import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, SplitCanvasMetaData } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
 
 class BarcodeApp extends React.Component {
@@ -60,7 +60,7 @@ class BarcodeApp extends React.Component {
         console.log("Worker initializing... ")
 
         // 
-        if(AppMode == AppModes.AUTO || AppMode == AppModes.CROP){
+        if(AppMode === AppModes.AUTO || AppMode === AppModes.CROP){
 
             /////////////////////////////
             // worker for AUTO, CROP  ///
@@ -185,7 +185,7 @@ class BarcodeApp extends React.Component {
         }
 
 
-        if(AppMode == AppModes.CROP){
+        if(AppMode === AppModes.CROP){
             this.controllerCanvasRef.current!.addEventListener("touchstart", (e)=>{
                 e.preventDefault(); 
                 props.startSelect(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
@@ -206,7 +206,6 @@ class BarcodeApp extends React.Component {
         console.log('execMainLoop')
 
         const video = this.videoRef.current!
-        const controller = this.controllerCanvasRef.current!
 
         this.gameLoop() 
         this.checkParentSizeChanged(video)
@@ -219,8 +218,6 @@ class BarcodeApp extends React.Component {
     }
 
     requestScanBarcode = async () => {
-        const props = this.props as any
-        const gs = this.props as GlobalState
         console.log('requestScanBarcode')
         const video = this.videoRef.current!
         const controller = this.controllerCanvasRef.current!
@@ -246,7 +243,7 @@ class BarcodeApp extends React.Component {
 
 
         const images = getBoxImageBitmap(captureCanvas, boxMetadata)
-        if(AppMode == AppModes.AUTO || AppMode == AppModes.CROP){
+        if(AppMode === AppModes.AUTO || AppMode === AppModes.CROP){
             this.worker!.postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: boxMetadata, images: images, angles:[0, 90, 45] }, images)
         }
 
@@ -313,7 +310,6 @@ class BarcodeApp extends React.Component {
 
     render() {
         const gs = this.props as GlobalState
-        const props = this.props as any
         const video = this.videoRef.current!
         const controller = this.controllerCanvasRef.current!
 
