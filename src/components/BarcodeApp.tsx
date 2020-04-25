@@ -4,7 +4,7 @@ import { WorkerResponse, DisplayConstraint, WorkerCommand, AIConfig, AppStatus, 
 import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid, getBoxImages, SplitCanvasMetaData } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
 
-class App extends React.Component {
+class BarcodeApp extends React.Component {
     ////////////////////
     // HTML Component //
     ////////////////////
@@ -33,8 +33,7 @@ class App extends React.Component {
     // Worker!!  //
     ///////////////
     worker_num = 1
-    workers:Worker[] = []
-//    worker = new Worker('../workers/worker.ts', { type: 'module' })
+    worker:Worker|null = null
 
 
     /**
@@ -44,7 +43,6 @@ class App extends React.Component {
     fps   = 0.0
     frameCountStartTime = new Date().getTime()
     gameLoop() {
-        
         this.frame++
         const thisTime = new Date().getTime()
         if (thisTime - this.frameCountStartTime > 1000) {
@@ -59,31 +57,36 @@ class App extends React.Component {
      * ワーカーの初期化
      */
     async initWorker() {
-        for(let i=0; i<this.worker_num;i++){
-        //for(let i=0; i<AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS;i++){
-            console.log("Worker initializing... ",i)
-            const worker = new Worker('../workers/worker.ts', { type: 'module' })
-            worker.onmessage = (event) => {
+        console.log("Worker initializing... ")
 
-                const barcodeDisplay = this.barcodeDisplayCanvasRef.current!
+        // 
+        if(AppMode == AppModes.AUTO || AppMode == AppModes.CROP){
 
-                const ctx = barcodeDisplay.getContext("2d")!
-
-                ctx.strokeStyle  = "#DD3333FF";
-                ctx.lineWidth    = 1;
-                const font       = "16px sans-serif";
-                ctx.font         = font;
-                ctx.textBaseline = "top";
-                ctx.fillStyle = "#DD3333FF";
-                ctx.clearRect(0,0,barcodeDisplay.width,barcodeDisplay.height)
-
-
-                if (event.data.message === WorkerResponse.SCANED_BARCODE) {
+            /////////////////////////////
+            // worker for AUTO, CROP  ///
+            /////////////////////////////
+            this.worker = new Worker('../workers/worker.ts', { type: 'module' })
+            // コールバック
+            this.worker.onmessage = (event) => {
+                if (event.data.message === WorkerResponse.INITIALIZED) {
+                    window.requestAnimationFrame(this.execMainLoop);
+                }else if (event.data.message === WorkerResponse.SCANED_BARCODE) {
                     console.log("RECEIVED:",event)
                     const boxMetadata:SplitCanvasMetaData[] = event.data.boxMetadata
                     const barcodes:string[] = event.data.barcodes
                     const point_xs:number[] = event.data.point_xs
                     const point_ys:number[] = event.data.point_ys
+
+                    const barcodeDisplay = this.barcodeDisplayCanvasRef.current!
+                    const ctx = barcodeDisplay.getContext("2d")!
+        
+                    ctx.strokeStyle  = "#DD3333FF";
+                    ctx.lineWidth    = 1;
+                    const font       = "16px sans-serif";
+                    ctx.font         = font;
+                    ctx.textBaseline = "top";
+                    ctx.fillStyle = "#DD3333FF";
+                    ctx.clearRect(0,0,barcodeDisplay.width,barcodeDisplay.height)                    
                     
                     const box_num = boxMetadata.length
                     for(let j=0; j<box_num; j++){
@@ -98,25 +101,21 @@ class App extends React.Component {
                             ctx.fillText(barcode, box_offset_x+point_offset_x+15, box_offset_y+point_offset_y,)
                         }
                     }
-
-                    if(i === 0){
-                        if(AppMode == AppModes.AUTO){
-                            window.requestAnimationFrame(this.execMainLoop);
-                        }
+    
+                    if(AppMode == AppModes.AUTO){
+                        window.requestAnimationFrame(this.execMainLoop);
                     }
                 }else if (event.data.message === WorkerResponse.NOT_PREPARED){
-                    if(i === 0){
-                        if(AppMode == AppModes.AUTO){
-                            window.requestAnimationFrame(this.execMainLoop);
-                        }
+                    if(AppMode == AppModes.AUTO){
+                        window.requestAnimationFrame(this.execMainLoop);
                     }
                 }
             }
             const overlay = this.workerMonitorCanvasRef.current!
             const overlay_offscreen= overlay.transferControlToOffscreen()
-            worker.postMessage({message:WorkerCommand.SET_OVERLAY, overlay:overlay_offscreen},[overlay_offscreen])
-            this.workers.push(worker)
+            this.worker.postMessage({message:WorkerCommand.SET_OVERLAY, overlay:overlay_offscreen},[overlay_offscreen])
         }
+
         return
     }
 
@@ -178,8 +177,6 @@ class App extends React.Component {
             Promise.all([initWorkerPromise, webCamPromise])
                 .then((res) => {
                     console.log('Camera and model ready!')
-                    window.requestAnimationFrame(this.execMainLoop);
-                    //this.execMainLoop()
                     props.initialized()
                 })
                 .catch(error => {
@@ -249,11 +246,9 @@ class App extends React.Component {
 
 
         const images = getBoxImageBitmap(captureCanvas, boxMetadata)
-        
-        // for(let i = 0; i < AIConfig.SPLIT_COLS*AIConfig.SPLIT_ROWS; i++){
-        //     this.workers[i].postMessage({ message: WorkerCommand.SCAN_BARCODE, images: [images[i]], angles:[0, 90, 5, 85] }, [images[i]])
-        // }
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: boxMetadata, images: images, angles:[0, 90, 45] }, images)
+        if(AppMode == AppModes.AUTO || AppMode == AppModes.CROP){
+            this.worker!.postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: boxMetadata, images: images, angles:[0, 90, 45] }, images)
+        }
 
 
         // ///////////////////////////////
@@ -311,7 +306,7 @@ class App extends React.Component {
         }
 
 
-        this.workers[0].postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: [box], images: [input], angles:[0, 90, 45] }, [input])
+        this.worker!.postMessage({ message: WorkerCommand.SCAN_BARCODE, boxMetadata: [box], images: [input], angles:[0, 90, 45] }, [input])
         
     }
 
@@ -327,13 +322,14 @@ class App extends React.Component {
         if(gs.status === AppStatus.INITIALIZED){
             console.log('initialized')
             this.checkParentSizeChanged(video)
-            if(AppMode == AppModes.AUTO){
-                this.requestScanBarcode()
-            }
+            // if(AppMode == AppModes.AUTO){
+            //     this.requestScanBarcode()
+            // }
         }
 
 
         if(AppMode == AppModes.CROP){
+            this.checkParentSizeChanged(video)
             if(gs.inSelect===true){
                 const ctx = controller.getContext("2d")!
                 ctx.strokeStyle  = "#DD3333FF";
@@ -391,4 +387,4 @@ class App extends React.Component {
 }
 
 
-export default App;
+export default BarcodeApp;

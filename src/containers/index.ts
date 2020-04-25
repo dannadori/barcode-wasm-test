@@ -2,8 +2,8 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux'
 
 import { Actions } from '../actions'
-import App from '../components/App'
 import { GlobalState } from '../reducers';
+import BarcodeApp from '../components/BarcodeApp';
 
 export interface Props {
 }
@@ -25,6 +25,6 @@ function mapDispatchToProps(dispatch: Dispatch) {
 const Connector = connect(
   mapStateToProps,
   mapDispatchToProps
-)(App);
+)(BarcodeApp);
 
 export default Connector;

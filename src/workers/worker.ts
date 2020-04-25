@@ -5,18 +5,28 @@ import { AIConfig } from "../const";
 
 const ctx: Worker = self as any  // eslint-disable-line no-restricted-globals
 
+let init_zxing = false
+let init_cv = false
+
 const cv_asm = require('../resources/opencv.js');
+const zxing_asm = require('../resources/zxing')
+
 cv_asm.onRuntimeInitialized = function () {
     console.log("initialized cv_asm")
     init_cv = true
+    initializationReport()
 }
-const zxing_asm = require('../resources/zxing')
 zxing_asm.onRuntimeInitialized = function () {
     console.log("initialized zxing_asm")
     init_zxing = true
+    initializationReport()
 }
-let init_zxing = false
-let init_cv = false
+
+export const initializationReport = () =>{
+    if(init_zxing === true && init_cv === true){
+        ctx.postMessage({ message: WorkerResponse.INITIALIZED})
+    }
+}
 
 let decodePtr: any = null
 let decodeCallback: any = null

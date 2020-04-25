@@ -7,6 +7,7 @@ import createSagaMiddleware from 'redux-saga';
 import rootSaga from './saga';
 import reducer from './reducers';
 import Connector from './containers';
+import { AppMode, AppModes } from './const';
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
@@ -20,7 +21,15 @@ sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(
     <Provider store={store}>
-       <Connector />
+      {(()=>{
+        console.log("RENDLER")
+        if(AppMode == AppModes.AUTO || AppMode == AppModes.CROP){
+          return <Connector />
+        }else{
+
+        }
+      })()}
+
     </Provider>
     ,document.getElementById('root'));
 

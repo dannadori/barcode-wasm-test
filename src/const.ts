@@ -1,5 +1,4 @@
 
-
 export const AppStatus = {
     INITIALIZING: "initializing",
     INITIALIZED : "initialized",
@@ -38,6 +37,7 @@ export const WorkerCommand = {
 
 export const WorkerResponse = {
     NOT_PREPARED   : 'not_prepared',
+    INITIALIZED   : 'initialized',
     SCANED_BARCODE : 'scaned_barcode',
 }
 
