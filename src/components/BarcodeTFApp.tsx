@@ -88,7 +88,7 @@ class BarcodeTFApp extends React.Component {
         ctx2.clearRect(0, 0, areaCV.width, areaCV.height)
         ctx2.strokeStyle  = "#DD3333FF";
         ctx2.lineWidth    = 1;
-        const font       = "16px sans-serif";
+        const font       = "32px sans-serif";
         ctx2.font         = font;
         ctx2.textBaseline = "top";
         ctx2.fillStyle = "#DD3333FF";
@@ -97,12 +97,15 @@ class BarcodeTFApp extends React.Component {
         const area_num = areas.length
         ctx2.beginPath();
         for(let i = 0; i < area_num; i ++){
+            if(barcodes[i] === ""){
+                continue
+            }
             const area = areas[i]
-            // ctx2.moveTo(area[0] * areaCV.width, area[1] * areaCV.height)
-            // ctx2.lineTo(area[2] * areaCV.width, area[3] * areaCV.height)
-            // ctx2.lineTo(area[6] * areaCV.width, area[7] * areaCV.height)
-            // ctx2.lineTo(area[4] * areaCV.width, area[5] * areaCV.height)
-            // ctx2.lineTo(area[0] * areaCV.width, area[1] * areaCV.height)
+            // ctx2.moveTo(area[0] * areaCV.width + 10, area[1] * areaCV.height + 10)
+            // ctx2.lineTo(area[2] * areaCV.width - 10, area[3] * areaCV.height + 10)
+            // ctx2.lineTo(area[6] * areaCV.width - 10, area[7] * areaCV.height - 10 )
+            // ctx2.lineTo(area[4] * areaCV.width + 10, area[5] * areaCV.height - 10)
+            // ctx2.lineTo(area[0] * areaCV.width + 10, area[1] * areaCV.height + 10)
             // ctx2.stroke();
             ctx2.fillText(barcodes[i], area[0] * areaCV.width, area[1] * areaCV.height)
         }
@@ -131,7 +134,7 @@ class BarcodeTFApp extends React.Component {
                 this.requestScanBarcode()
 
                 const maskBitmap = event.data.maskBitmap 
-                this.previewMask(maskBitmap)
+                //this.previewMask(maskBitmap)
 
 
                 const videoOffscreen = new OffscreenCanvas(this.working_video_img!.width, this.working_video_img!.height)
@@ -267,8 +270,8 @@ class BarcodeTFApp extends React.Component {
 
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
-                <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} />
-                <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef2} />
+                {/* <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} />
+                <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef2} /> */}
                 <video
                     autoPlay
                     playsInline
