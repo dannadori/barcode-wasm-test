@@ -50,10 +50,6 @@ decodePtr = zxing_asm.addFunction(decodeCallback, 'iiiiiffffffff');
 
 
 
-
-
-
-
 export const drawCountours = (mask: ImageData): number[][] => {
   const mask_src = cv_asm.matFromImageData(mask)
 
@@ -98,7 +94,6 @@ export const drawCountours = (mask: ImageData): number[][] => {
     // }
 
 
-
     //回転矩形の頂点取得＋変形用ソート[[左上の座標],[右上の座標],[左下の座標],[右下の座標]]
     let src_pers = []
     for (let i = 0; i < 4; i++) {
@@ -130,8 +125,6 @@ export const drawCountours = (mask: ImageData): number[][] => {
     // cv.line(dst, bottom[1], bottom[0], color3, 2, l, 0);
     // cv.line(dst, bottom[0], tops[0], color3, 2, l, 0);
 
-
-
     src_pers = [tops[0].x / mask.width, tops[0].y / mask.height, tops[1].x / mask.width, tops[1].y / mask.height,
     bottom[0].x / mask.width, bottom[0].y / mask.height, bottom[1].x / mask.width, bottom[1].y / mask.height]
     detectedAreas.push(src_pers)
@@ -144,8 +137,6 @@ export const drawCountours = (mask: ImageData): number[][] => {
   mask_src.delete()
   return detectedAreas
 }
-
-
 
 export const transform = (video_img: ImageData, areas: number[][]): ImageData[] => {
   const transformed_width = AIConfig.SPLIT_WIDTH
@@ -195,12 +186,6 @@ export const transform = (video_img: ImageData, areas: number[][]): ImageData[] 
   return transformedImages
 
 }
-
-
-
-
-
-
 
 
 
@@ -287,7 +272,6 @@ onmessage = (event) => {
     videoCtx.drawImage(videoBitmap, 0, 0)
     const videoImageData = videoCtx.getImageData(0, 0, videoBitmap.width, videoBitmap.height)
     const transformedImages = transform(videoImageData, areas)
-
 
     // for (let i =0; i< transformedImages.length; i++){
     //   console.log("transformedImage::::", transformedImages[i].width, transformedImages[i].height)

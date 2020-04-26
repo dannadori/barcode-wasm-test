@@ -36,11 +36,9 @@ class BarcodeTFApp extends React.Component {
     ///////////////
     worker_num = 1
     workerSS:Worker|null = null
-    workerSSMask:Worker|null = null
     workerCV:Worker|null = null
 
     workerSSInitialized = false
-    workerSSMaskInitialized = false
     workerCVInitialized = false
 
     video_img:ImageData|null = null
@@ -65,23 +63,22 @@ class BarcodeTFApp extends React.Component {
 
     checkAndStart = () =>{
         if(this.workerSSInitialized      === true && 
-            this.workerSSMaskInitialized === true && 
             this.workerCVInitialized     === true
             ){
             this.requestScanBarcode()
         }
     }
 
-    previewMask = (maskImage:ImageData) =>{
-        const offscreen = new OffscreenCanvas(maskImage.width, maskImage.height)
-        const ctx = offscreen.getContext("2d")!
-        ctx.putImageData(maskImage, 0, 0)
+    previewMask = (maskImage:ImageBitmap) =>{
+        // const offscreen = new OffscreenCanvas(maskImage.width, maskImage.height)
+        // const ctx = offscreen.getContext("2d")!
+        // ctx.putImageData(maskImage, 0, 0)
 
         const maskMonitor  = this.workerSSMaskMonitorCanvasRef.current!
         maskMonitor.width  = this.overlayWidth
         maskMonitor.height = this.overlayHeight
         const ctx2 = maskMonitor.getContext("2d")!
-        ctx2.drawImage(offscreen, 0, 0, maskMonitor.width, maskMonitor.height)
+        ctx2.drawImage(maskImage, 0, 0, maskMonitor.width, maskMonitor.height)
     }
     previewAreas = (areas:number[][], barcodes:string[]) =>{
         const areaCV  = this.workerAreaCVCanvasRef.current!
@@ -133,34 +130,15 @@ class BarcodeTFApp extends React.Component {
                 // 再キャプチャ
                 this.requestScanBarcode()
 
-                // // マスク作成
-                const maskParts   = event.data.maskParts
-                const boxMetadata = event.data.boxMetadata
-                this.workerSSMask!.postMessage({ message: WorkerCommand.DRAW_MASK, boxMetadata: boxMetadata,maskParts: maskParts})
-                event.data.maskParts   = null // メモリリーク予防。（これをやらないとリークするようだ。）
-                event.data.boxMetadata = null // メモリリーク予防。（これをやらないとリークするようだ。）
-            }
-        }
+                const maskBitmap = event.data.maskBitmap 
+                this.previewMask(maskBitmap)
 
-        // マスク作成 用ワーカー
-        this.workerSSMask = new Worker('../workers/workerSSMask.ts', { type: 'module' })
-        this.workerSSMaskInitialized = true
-        this.workerSSMask.onmessage = (event) => {
-            if (event.data.message === WorkerResponse.DREW_MASK) {
-                console.log("DREW MASK", this.workerSSMaskMonitorCanvasRef.current!.width, this.workerSSMaskMonitorCanvasRef.current!.height)
-                const maskImage:ImageData = event.data.mask_img
-                this.previewMask(maskImage)
 
                 const videoOffscreen = new OffscreenCanvas(this.working_video_img!.width, this.working_video_img!.height)
                 videoOffscreen.getContext("2d")!.putImageData(this.working_video_img!, 0, 0)
                 const videoBitmap = videoOffscreen.transferToImageBitmap()
 
-                const maskOffscreen = new OffscreenCanvas(maskImage.width, maskImage.height)
-                maskOffscreen.getContext("2d")!.putImageData(maskImage, 0, 0)
-                const maskBitmap = maskOffscreen.transferToImageBitmap()
-
                 this.workerCV!.postMessage({ message: WorkerCommand.SCAN_BARCODES, videoBitmap: videoBitmap, maskBitmap:maskBitmap}, [videoBitmap, maskBitmap])
-                event.data.mask_img = null
             }
         }
 
@@ -180,9 +158,6 @@ class BarcodeTFApp extends React.Component {
                 event.data.areas    = null
             }
         }
-
-
-
 
         return
     }
@@ -285,14 +260,10 @@ class BarcodeTFApp extends React.Component {
         const gs = this.props as GlobalState
         const video = this.videoRef.current!
 
-
-
         if(gs.status === AppStatus.INITIALIZED){
             console.log('initialized')
             this.checkParentSizeChanged(video)
         }
-
-
 
         return (
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >

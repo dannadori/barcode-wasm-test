@@ -6,11 +6,13 @@ import { AIConfig } from '../const'
 import { SplitCanvasMetaData } from './PreProcessing'
 
 
+
 export const predictByImageBitmaps = async (model:tf.GraphModel, bms:ImageBitmap[]) : Promise<number[][][] | null> =>{
     let mapDatas:number[][][]|null = null
-    await with_time_async("Predict local",async ()=>{
+//    await with_time_async("Predict local",async ()=>{
         //console.log('Prediction start ...')
-        const res = tf.tidy(  () => {
+//        const res = tf.tidy(  () => {
+            tf.engine().startScope()            
             const bm_num = bms.length
 
             const canvasTensors = []
@@ -31,13 +33,15 @@ export const predictByImageBitmaps = async (model:tf.GraphModel, bms:ImageBitmap
             if(bm_num===1){
                 res = res.expandDims()
             }
-            return res
-        }) as tf.Tensor<tf.Rank>
+
+//            return res
+//        }) as tf.Tensor<tf.Rank>
 
         // console.log('Prediction is done. Map drawing...')
         mapDatas = await res.array() as number[][][]
         res.dispose()
-    }, false)
+        tf.engine().endScope()
+//    }, false)
 
     return mapDatas!
 }

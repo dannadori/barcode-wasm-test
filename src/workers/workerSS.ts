@@ -1,6 +1,6 @@
 
 import * as tf from '@tensorflow/tfjs';
-import { predictByImageBitmaps } from '../AI/SemanticSegmentation';
+import { predictByImageBitmaps, drawMask } from '../AI/SemanticSegmentation';
 import { AIConfig, WorkerCommand, WorkerResponse } from '../const';
 
 
@@ -22,7 +22,14 @@ onmessage = async (event) => {
     const boxMetadata = event.data.boxMetadata
     const images:ImageBitmap[] = event.data.images
     const maskParts = await predictByImageBitmaps(model!, images)
-    ctx.postMessage({message:WorkerResponse.PREDICTED_AREA, maskParts:maskParts, boxMetadata:boxMetadata})
+    const maskImageData = drawMask(boxMetadata, maskParts!)
+    const offscreen = new OffscreenCanvas(maskImageData.width, maskImageData.height)
+    offscreen.getContext("2d")!.putImageData(maskImageData, 0, 0)
+    const maskBitmap = offscreen.transferToImageBitmap()
+   ctx.postMessage({message:WorkerResponse.PREDICTED_AREA, maskBitmap:maskBitmap}, [maskBitmap])
+
+//    ctx.postMessage({message:WorkerResponse.PREDICTED_AREA, maskParts:maskParts, boxMetadata:boxMetadata})
+//    ctx.postMessage({message:WorkerResponse.PREDICTED_AREA})
 
     for(let i =0;i<images.length;i++){
       images[i].close()
