@@ -28,6 +28,7 @@ onmessage = async (event) => {
       images[i].close()
     }
     event.data.boxMetadata = null
+    event.data.images      = null
   }
 } 
 

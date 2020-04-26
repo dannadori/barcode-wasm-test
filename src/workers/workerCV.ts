@@ -300,6 +300,8 @@ onmessage = (event) => {
 
     videoBitmap.close()
     maskBitmap.close()
+    event.data.maskBitmap = null
+    event.data.videoBitmap = null
   }
 };
 
