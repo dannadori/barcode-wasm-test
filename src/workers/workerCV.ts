@@ -224,7 +224,11 @@ export const scanBarcode = (image: ImageData, angle: number[]): string => {
       }
 
     }, false)
+
     const err = zxing_asm._decode_ean13(decodePtr);
+    //if (barcode === "") {
+    //  zxing_asm._decode_qr(decodePtr);
+    //}
     if (barcode !== "") {
       return barcode
     }
