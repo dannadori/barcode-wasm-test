@@ -17,8 +17,10 @@ export const AppMode = AppModes.AUTO_WITH_TF
 export const AIConfig = {
     // SPLIT_COLS: 3,
     // SPLIT_ROWS: 5,
-    SPLIT_COLS: 1,
-    SPLIT_ROWS: 2,
+    // SPLIT_COLS: 1,
+    // SPLIT_ROWS: 2,
+    SPLIT_COLS: 2,
+    SPLIT_ROWS: 4,
 
     SPLIT_MERGIN: 0.2,
     SPLIT_WIDTH: 300,
