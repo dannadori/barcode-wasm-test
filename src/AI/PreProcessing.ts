@@ -13,8 +13,8 @@ export interface SplitCanvasMetaData {
 
 export const captureVideoImageToCanvas = (video:HTMLVideoElement):HTMLCanvasElement => {
     const videoCaptureCanvas    = document.createElement("canvas");
-    videoCaptureCanvas.width = video.width
-    videoCaptureCanvas.height = video.height
+    videoCaptureCanvas.width = video.videoWidth
+    videoCaptureCanvas.height = video.videoHeight
 
     const tmpCtx                = videoCaptureCanvas.getContext('2d')!
     tmpCtx.drawImage(video, 0, 0, videoCaptureCanvas.width, videoCaptureCanvas.height);
@@ -23,10 +23,6 @@ export const captureVideoImageToCanvas = (video:HTMLVideoElement):HTMLCanvasElem
 
 
 export const splitCanvasToBoxes = (originaCanvas: HTMLCanvasElement, col_num:number, row_num:number): SplitCanvasMetaData[] => {
-    // const col_num = colnum
-    // const row_num = rownum
-    // const col_num = AIConfig.SPLIT_COLS
-    // const row_num = AIConfig.SPLIT_ROWS
     const tile_num = col_num * row_num
     const sizeWithMergin = 1.0 + AIConfig.SPLIT_MERGIN
     const mergin = AIConfig.SPLIT_MERGIN

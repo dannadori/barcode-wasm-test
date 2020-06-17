@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, DisplayConstraint, WorkerCommand,AppStatus, DisplayConstraintOptions, AIConfig } from '../const';
+import { WorkerResponse, WorkerCommand,AppStatus, DisplayConstraintOptions } from '../const';
 import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid } from '../AI/PreProcessing';
 import { findOverlayLocation, } from '../utils'
-import { Menu, Dropdown, Button, Label } from 'semantic-ui-react'
+import { Dropdown, Label } from 'semantic-ui-react'
 
 interface BarcodeTFAppState{
     videoResolution:string,
@@ -202,6 +202,13 @@ class BarcodeTFApp extends React.Component {
         // サイズ算出
         this.videoHeight = video.videoHeight
         this.videoWidth  = video.videoWidth
+        // this.videoWidth  = video.width
+        // this.videoHeight  = 
+        // const ms = (video.srcObject! as MediaStream)
+        // const {width, height} = ms.getTracks()[0].getSettings();
+        // this.videoWidth  = width!
+        // this.videoHeight = height!
+
         const parentHeight = video.getBoundingClientRect().bottom - video.getBoundingClientRect().top
         const parentWidth  = video.getBoundingClientRect().right - video.getBoundingClientRect().left
         // console.log("--- checkParentSizeChanged ---")
@@ -216,13 +223,14 @@ class BarcodeTFApp extends React.Component {
         this.overlayXOffset = overlayXOffset
         this.overlayYOffset = overlayYOffset
 
-        // const status = this.statusCanvasRef.current!
-        // const ctx = status.getContext("2d")!
-        // ctx.clearRect(0,0,status.width, status.height)
-        // ctx.fillText(`${this.videoWidth}, ${this.videoHeight}, `,100,30)
-        // ctx.fillText(`${parentWidth}, ${parentHeight}, `,100,60)
-        // ctx.fillText(`${this.overlayXOffset}, ${this.overlayYOffset}, `,100,90)
-        // ctx.fillText(`${this.overlayWidth}, ${this.overlayHeight}, `,100,120)
+        const status = this.statusCanvasRef.current!
+        const ctx = status.getContext("2d")!
+        ctx.clearRect(0,0,status.width, status.height)
+        ctx.fillText(`${this.videoWidth}, ${this.videoHeight}, `,100,30)
+        ctx.fillText(`${video.width}, ${video.height}, `,100,45)
+        ctx.fillText(`${parentWidth}, ${parentHeight}, `,100,60)
+        ctx.fillText(`${this.overlayXOffset}, ${this.overlayYOffset}, `,100,90)
+        ctx.fillText(`${this.overlayWidth}, ${this.overlayHeight}, `,100,120)
 
     }
 
@@ -264,6 +272,7 @@ class BarcodeTFApp extends React.Component {
     }
 
     changeCameraResolution = (resolution:string) =>{
+        (this.videoRef.current!.srcObject as MediaStream ).getTracks().map(s=>s.stop())
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             const webCamPromise = navigator.mediaDevices
                 .getUserMedia({
@@ -356,6 +365,9 @@ class BarcodeTFApp extends React.Component {
         })
 
         return (
+
+
+            // <div style={{width:"300px", height:"500px"}}>
             <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
                 {/* <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} />
                 <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef2} /> */}
@@ -365,8 +377,6 @@ class BarcodeTFApp extends React.Component {
                     muted
                     ref={this.videoRef}
                     style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }}
-                    width={this.videoWidth}
-                    height={this.videoHeight}
                 />
                 <canvas
                     ref = {this.workerSSMaskMonitorCanvasRef}
@@ -414,6 +424,8 @@ class BarcodeTFApp extends React.Component {
 
                 </div>
             </div>
+            // </div>
+
         )
     }
 
