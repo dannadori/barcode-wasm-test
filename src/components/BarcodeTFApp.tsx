@@ -13,7 +13,7 @@ interface BarcodeTFAppState{
     showGrid:boolean,
 }
 
-class BarcodeTFApp extends React.Component {
+class BarcodeTFApp2 extends React.Component {
     state: BarcodeTFAppState = {
         videoResolution: "VGA",
         colnum: 1,
@@ -202,18 +202,16 @@ class BarcodeTFApp extends React.Component {
         // サイズ算出
         this.videoHeight = video.videoHeight
         this.videoWidth  = video.videoWidth
-        // this.videoWidth  = video.width
-        // this.videoHeight  = 
-        // const ms = (video.srcObject! as MediaStream)
-        // const {width, height} = ms.getTracks()[0].getSettings();
-        // this.videoWidth  = width!
-        // this.videoHeight = height!
 
-        const parentHeight = video.getBoundingClientRect().bottom - video.getBoundingClientRect().top
+        let parentHeight = video.getBoundingClientRect().bottom - video.getBoundingClientRect().top
         const parentWidth  = video.getBoundingClientRect().right - video.getBoundingClientRect().left
         // console.log("--- checkParentSizeChanged ---")
         // console.log(video.getBoundingClientRect().left, video.getBoundingClientRect().top, video.getBoundingClientRect().right, video.getBoundingClientRect().bottom)
         // console.log(parentWidth, parentHeight)
+
+        if(parentHeight === 0){
+            parentHeight = 500
+        }
 
         this.parentHeight = parentHeight
         this.parentWidth = parentWidth
@@ -223,14 +221,23 @@ class BarcodeTFApp extends React.Component {
         this.overlayXOffset = overlayXOffset
         this.overlayYOffset = overlayYOffset
 
-        const status = this.statusCanvasRef.current!
-        const ctx = status.getContext("2d")!
-        ctx.clearRect(0,0,status.width, status.height)
-        ctx.fillText(`${this.videoWidth}, ${this.videoHeight}, `,100,30)
-        ctx.fillText(`${video.width}, ${video.height}, `,100,45)
-        ctx.fillText(`${parentWidth}, ${parentHeight}, `,100,60)
-        ctx.fillText(`${this.overlayXOffset}, ${this.overlayYOffset}, `,100,90)
-        ctx.fillText(`${this.overlayWidth}, ${this.overlayHeight}, `,100,120)
+        // const status = this.statusCanvasRef.current!
+        // const ctx = status.getContext("2d")!
+        // ctx.clearRect(0,0,status.width, status.height)
+        // ctx.fillText(`${this.videoWidth}, ${this.videoHeight}, `,100,30)
+        // ctx.fillText(`${video.width}, ${video.height}, `,100,45)
+        // ctx.fillText(`${parentWidth}, ${parentHeight}, `,100,60)
+        // ctx.fillText(`${this.overlayXOffset}, ${this.overlayYOffset}, `,100,90)
+        // ctx.fillText(`${this.overlayWidth}, ${this.overlayHeight}, `,100,120)
+
+        // console.log(`>>>>1   ${this.videoWidth}, ${this.videoHeight}, `)
+        // console.log(`>>>>2   ${video.width}, ${video.height}, `)
+        // console.log(`>>>>3   ${parentWidth}, ${parentHeight}, `)
+        // console.log(`>>>>4   ${this.overlayXOffset}, ${this.overlayYOffset}, `)
+        // console.log(`>>>>5   ${this.overlayWidth}, ${this.overlayHeight}, `)
+        
+        // console.log(`>>>> 6  ${video.getBoundingClientRect().bottom} - ${video.getBoundingClientRect().top}`)
+        // console.log(`>>>> 6  ${video.getBoundingClientRect().right} - ${video.getBoundingClientRect().left}`)
 
     }
 
@@ -355,20 +362,17 @@ class BarcodeTFApp extends React.Component {
             return {key:v, text:v, value:v}
         })
 
-        const colnumOptionList = [1,2,3,4,5]
+        const colnumOptionList = [1,2,3]
         const colnumOptions = colnumOptionList.map(v =>{
             return {key:v, text:v, value:v}
         })
-        const rownumOptionList = [1,2,3,4,5]
+        const rownumOptionList = [1,2,3]
         const rownumOptions = rownumOptionList.map(v =>{
             return {key:v, text:v, value:v}
         })
 
         return (
-
-
-            // <div style={{width:"300px", height:"500px"}}>
-            <div style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }} ref={this.parentRef} >
+            <div style={{ width: "100%", height: "100%", position: "relative", top: 0, left: 0, }} ref={this.parentRef} >
                 {/* <img src="imgs/barcode01.png" alt="barcode" ref={this.imageRef1} />
                 <img src="imgs/barcode02.png" alt="barcode" ref={this.imageRef2} /> */}
                 <video
@@ -376,35 +380,37 @@ class BarcodeTFApp extends React.Component {
                     playsInline
                     muted
                     ref={this.videoRef}
-                    style={{ width: "100%", height: "100%", position: "fixed", top: 0, left: 0, }}
+                    //style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    
+                    style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0, }}
                 />
                 <canvas
                     ref = {this.workerSSMaskMonitorCanvasRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
                 />
                 <canvas
                     ref = {this.workerAreaCVCanvasRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
                 />
                 <canvas
                     ref={this.barcodeDisplayCanvasRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
                 />
 
                 <canvas
                     ref={this.controllerCanvasRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
                 />
 
                 <canvas
                     ref={this.statusCanvasRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
                 />
 
 
                 <div 
                     ref={this.controllerDivRef}
-                    style={{ position: "fixed", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
+                    style={{ position: "absolute", top: this.overlayYOffset, left: this.overlayXOffset, width:this.overlayWidth, height:this.overlayHeight}}
                 >
                     <Dropdown text='Resolution' options={constraintOptions } simple item onChange={(e, { value }) => {
                         this.changeCameraResolution(value as string)
@@ -424,12 +430,30 @@ class BarcodeTFApp extends React.Component {
 
                 </div>
             </div>
-            // </div>
 
         )
     }
 
 }
 
+
+
+class BarcodeTFApp extends React.Component {
+    render() {
+        return(
+            // <div style={{ width: "100%", height: "500px", position: "relative", top: 0, left: 0, }}>
+            <div>
+                <Label>
+                    A
+                </Label>
+                <br />
+                <Label>
+                    b
+                </Label>
+                <BarcodeTFApp2 {...this.props} />
+            </div>
+        )
+    }
+}
 
 export default BarcodeTFApp;
