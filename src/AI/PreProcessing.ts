@@ -6,6 +6,8 @@ export interface SplitCanvasMetaData {
     minY   : number // 画像全体での開始位置Y (ratio)
     maxX   : number // 画像全体での終了位置X (ratio)
     maxY   : number // 画像全体での終了位置Y (ratio)
+    col_num : number // 全体の数(このメタデータのインデックスでないことに注意)
+    row_num : number // 全体の数(このメタデータのインデックスでないことに注意)
 }
 
 
@@ -20,9 +22,11 @@ export const captureVideoImageToCanvas = (video:HTMLVideoElement):HTMLCanvasElem
 }
 
 
-export const splitCanvasToBoxes = (originaCanvas: HTMLCanvasElement): SplitCanvasMetaData[] => {
-    const col_num = AIConfig.SPLIT_COLS
-    const row_num = AIConfig.SPLIT_ROWS
+export const splitCanvasToBoxes = (originaCanvas: HTMLCanvasElement, col_num:number, row_num:number): SplitCanvasMetaData[] => {
+    // const col_num = colnum
+    // const row_num = rownum
+    // const col_num = AIConfig.SPLIT_COLS
+    // const row_num = AIConfig.SPLIT_ROWS
     const tile_num = col_num * row_num
     const sizeWithMergin = 1.0 + AIConfig.SPLIT_MERGIN
     const mergin = AIConfig.SPLIT_MERGIN
@@ -43,6 +47,8 @@ export const splitCanvasToBoxes = (originaCanvas: HTMLCanvasElement): SplitCanva
             minX: minX, // 割合
             maxY: maxY, // 割合
             maxX: maxX, // 割合
+            col_num: col_num,
+            row_num: row_num,
         }
         resultBoxes.push(box)
     }

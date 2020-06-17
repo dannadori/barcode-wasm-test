@@ -47,9 +47,9 @@ export const predictByImageBitmaps = async (model:tf.GraphModel, bms:ImageBitmap
 }
 
 
-export const drawMask = (boxMetadata:SplitCanvasMetaData[] , maskParts: number[][][]): ImageData =>{
-    const col_num = AIConfig.SPLIT_COLS
-    const row_num = AIConfig.SPLIT_ROWS
+export const drawMask = (boxMetadata:SplitCanvasMetaData[], maskParts: number[][][]): ImageData =>{
+    const col_num = boxMetadata[0].col_num
+    const row_num = boxMetadata[0].row_num
     const sizeWithMergin = 1.0 + AIConfig.SPLIT_MERGIN
 
 

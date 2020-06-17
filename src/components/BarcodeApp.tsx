@@ -160,7 +160,7 @@ class BarcodeApp extends React.Component {
             const webCamPromise = navigator.mediaDevices
                 .getUserMedia({
                     audio: false,
-                    video: DisplayConstraint.video
+                    video: DisplayConstraint
                 })
                 .then(stream => {
                     console.log(this.videoRef)
@@ -235,7 +235,7 @@ class BarcodeApp extends React.Component {
         // // drawGrid(controller, 100)
 
         const captureCanvas = captureVideoImageToCanvas(video)
-        const boxMetadata = splitCanvasToBoxes(captureCanvas)
+        const boxMetadata = splitCanvasToBoxes(captureCanvas, AIConfig.SPLIT_COLS, AIConfig.SPLIT_ROWS)
         drawBoxGrid(controller, boxMetadata)
 
         //const images = getBoxImages(captureCanvas, boxMetadata)
@@ -300,6 +300,8 @@ class BarcodeApp extends React.Component {
             minX: (start_x / controller.width), // 割合
             maxY: (end_y   / controller.height), // 割合
             maxX: (end_x   / controller.width), // 割合
+            col_num: AIConfig.SPLIT_COLS,
+            row_num: AIConfig.SPLIT_ROWS,
         }
 
 

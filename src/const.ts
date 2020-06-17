@@ -54,52 +54,42 @@ export const WorkerResponse = {
 /////////////////////////////
 ////// ディスプレイ設定  ////
 /////////////////////////////
-export const qvgaConstraints = {
-    video: {
-        facingMode: "environment",
-        width: { exact: 320 },
-        height: { exact: 240 }
-    }
+
+
+export const qvgaConstraints:MediaTrackConstraintSet = {
+    facingMode: "environment",
+    width: { exact: 320 },
+    height: { exact: 240 }
 };
 
-export const vgaConstraints = {
-    video: {
-        facingMode: "environment",
-        width: { exact: 640 },
-        height: { exact: 480 }
-    }
+export const vgaConstraints:MediaTrackConstraintSet = {
+    facingMode: "environment",
+    width: { exact: 640 },
+    height: { exact: 480 }
 };
 
-export const hdConstraints = {
-    video: {
-        facingMode: "environment",
-        width: { exact: 1280 },
-        height: { exact: 720 }
-    }
+export const hdConstraints:MediaTrackConstraintSet = {
+    facingMode: "environment",
+    width: { exact: 1280 },
+    height: { exact: 720 }
 };
 
-export const fullHdConstraints = {
-    video: {
-        facingMode: "environment",
-        width: { exact: 1920 },
-        height: { exact: 1080 }
-    }
+export const fullHdConstraints:MediaTrackConstraintSet = {
+    facingMode: "environment",
+    width: { exact: 1920 },
+    height: { exact: 1080 }
 };
 
-export const fourKConstraints = {
-    video: {
-        facingMode: "environment",
-        width: { ideal: 2500, max: 4096 },
-        height: { ideal: 1600, max: 4096 }
-    }
+export const fourKConstraints:MediaTrackConstraintSet = {
+    facingMode: "environment",
+    width: { ideal: 2500, max: 4096 },
+    height: { ideal: 1600, max: 4096 }
 };
 
-export const eightKConstraints = {
-    video: {
-        facingMode: "environment",
-        width: { ideal: 7680 },
-        height: { ideal: 4320 }
-    }
+export const eightKConstraints:MediaTrackConstraintSet = {
+    facingMode: "environment",
+    width: { ideal: 7680 },
+    height: { ideal: 4320 }
 };
 
 
@@ -112,5 +102,12 @@ export const DisplayConstraints = {
     EightK: eightKConstraints,
 } as const
 
+export const DisplayConstraintOptions:{[key:string]:MediaTrackConstraintSet} = {
+    "VGA"    : DisplayConstraints.VGA,
+    "HD"     : DisplayConstraints.HD,
+    "FULLHD" : DisplayConstraints.FULLHD
+}
+
+export const DisplayConstraint   = DisplayConstraints.FULLHD
 //export const DisplayConstraint = DisplayConstraints.HD
-export const DisplayConstraint = DisplayConstraints.VGA
+//export const DisplayConstraint = DisplayConstraints.VGA
