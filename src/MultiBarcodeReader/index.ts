@@ -118,7 +118,7 @@ export class MultiBarcodeReader{
                 continue
             }
             const area = areas[i]
-            const margin = AIConfig.DRAW_RECT_MARGIN
+            // const margin = AIConfig.DRAW_RECT_MARGIN
             // ctx2.moveTo(area[0] * areaCV.width + margin, area[1] * areaCV.height + margin)
             // ctx2.lineTo(area[2] * areaCV.width - margin, area[3] * areaCV.height + margin)
             // ctx2.lineTo(area[6] * areaCV.width - margin, area[7] * areaCV.height - margin)

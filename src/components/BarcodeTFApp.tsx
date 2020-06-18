@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, WorkerCommand,AppStatus, DisplayConstraintOptions, AIConfig } from '../const';
+import { AppStatus, DisplayConstraintOptions, AIConfig } from '../const';
 import { findOverlayLocation, } from '../utils'
 import { Dropdown, Label } from 'semantic-ui-react'
-import { ScalableSemanticSegmentation } from '../ScalableSemanticSegmentation';
 import { MultiBarcodeReader } from '../MultiBarcodeReader';
 
 interface BarcodeTFAppState{
@@ -167,7 +166,6 @@ class BarcodeTFApp2 extends React.Component {
      */
     componentDidMount() {
         console.log('Initializing')
-        const props = this.props as any
 
         const initWorkerPromise = this.initWorker()
 
