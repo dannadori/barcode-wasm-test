@@ -1,6 +1,6 @@
-import { WorkerCommand, WorkerResponse } from "../const";
+import { WorkerCommand, WorkerResponse } from "./const";
 import { with_time } from "../utils";
-import { AIConfig } from "../const";
+import { AIConfig } from "./const";
 
 
 const ctx: Worker = self as any  // eslint-disable-line no-restricted-globals
@@ -139,12 +139,12 @@ export const drawCountours = (mask: ImageData): number[][] => {
 }
 
 export const transform = (video_img: ImageData, areas: number[][]): ImageData[] => {
-  const transformed_width = AIConfig.SPLIT_WIDTH
-  const transformed_height = AIConfig.SPLIT_HEIGHT
-  console.log("--- areas ---", areas)
+  const transformed_width = AIConfig.TRANSFORMED_WIDTH
+  const transformed_height = AIConfig.TRANSFORMED_HEIGHT
+  // console.log("--- areas ---", areas)
   const area_num = areas.length
   const video_src = cv_asm.matFromImageData(video_img)
-  console.log("VIDEO SIZE4: ", video_img.width, video_img.height)
+  // console.log("VIDEO SIZE4: ", video_img.width, video_img.height)
   const transformedImages = []
   for (let i = 0; i < area_num; i++) {
     const src_pers = areas[i].map((x: number, index: number) => {
@@ -157,8 +157,8 @@ export const transform = (video_img: ImageData, areas: number[][]): ImageData[] 
     const dst_pers = [0, 0, transformed_width, 0, 0, transformed_height, transformed_width, transformed_height]
     let srcTri = cv_asm.matFromArray(4, 1, cv_asm.CV_32FC2, src_pers);
     let dstTri = cv_asm.matFromArray(4, 1, cv_asm.CV_32FC2, dst_pers);
-    console.log("VIDEO SIZE4: SRC PERSPECT: ", src_pers)
-    console.log("DST PERSPECT: ", dst_pers)
+    // console.log("VIDEO SIZE4: SRC PERSPECT: ", src_pers)
+    // console.log("DST PERSPECT: ", dst_pers)
 
     // 図形を変形
     const M = cv_asm.getPerspectiveTransform(srcTri, dstTri)
@@ -233,8 +233,6 @@ export const scanBarcode = (image: ImageData, angle: number[]): string => {
       return barcode
     }
   }
-
-
   return barcode
 }
 
@@ -255,8 +253,8 @@ export const scanBarcodes = (images: ImageData[]): string[] => {
 
 
 onmessage = (event) => {
-  console.log('---------WorkerCV_message---------')
-  console.log(event)
+  // console.log('---------WorkerCV_message---------')
+  // console.log(event)
 
   if (event.data.message === WorkerCommand.SCAN_BARCODES) { // バグ作り込む原因。リファクタ。(SCAN_BARCODEとSCAN_BARCODESがある)
     const videoBitmap: ImageBitmap = event.data.videoBitmap

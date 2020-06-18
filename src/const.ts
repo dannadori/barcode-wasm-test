@@ -5,24 +5,9 @@ export const AppStatus = {
     RUNNING     : "running",
 }
 
-export const AppModes={
-    AUTO: "auto",
-    CROP: "crop",
-    AUTO_WITH_TF: "auto_with_tf",
-}
-
-export const AppMode = AppModes.AUTO_WITH_TF
-//export const AppMode = AppModes.AUTO
-
 export const AIConfig = {
-    // SPLIT_COLS: 3,
-    // SPLIT_ROWS: 5,
-    // SPLIT_COLS: 1,
-    // SPLIT_ROWS: 2,
-    SPLIT_COLS: 2,
-    SPLIT_ROWS: 4,
 
-    SPLIT_MERGIN: 0.2,
+    SPLIT_MARGIN: 0.2,
     SPLIT_WIDTH: 300,
     SPLIT_HEIGHT: 300,
     TRANSFORMED_WIDTH: 300,

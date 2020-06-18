@@ -6,10 +6,8 @@ import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from './saga';
 import reducer from './reducers';
-import Connector from './containers';
 import ConnectorTF from './containers/indexTF'
 
-import { AppMode, AppModes } from './const';
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
@@ -24,11 +22,7 @@ sagaMiddleware.run(rootSaga);
 ReactDOM.render(
     <Provider store={store}>
       {(()=>{
-        if(AppMode === AppModes.AUTO || AppMode === AppModes.CROP){
-          return <Connector />
-        }else if(AppMode === AppModes.AUTO_WITH_TF){
-          return <ConnectorTF/>
-        }
+        return <ConnectorTF/>
       })()}
 
     </Provider>

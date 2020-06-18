@@ -1,17 +1,29 @@
 import * as React from 'react';
 import { GlobalState } from '../reducers';
-import { WorkerResponse, WorkerCommand,AppStatus, DisplayConstraintOptions } from '../const';
-import { captureVideoImageToCanvas, splitCanvasToBoxes,  getBoxImageBitmap, drawBoxGrid } from '../AI/PreProcessing';
+import { WorkerResponse, WorkerCommand,AppStatus, DisplayConstraintOptions, AIConfig } from '../const';
 import { findOverlayLocation, } from '../utils'
 import { Dropdown, Label } from 'semantic-ui-react'
+import { ScalableSemanticSegmentation } from '../ScalableSemanticSegmentation';
+import { MultiBarcodeReader } from '../MultiBarcodeReader';
 
 interface BarcodeTFAppState{
     count: number,
     videoResolution:string,
     colnum:number,
     rownum:number,
+    showRect:boolean,
     showSS:boolean,
     showGrid:boolean,
+}
+
+const captureVideoImageToCanvas = (video:HTMLVideoElement):HTMLCanvasElement => {
+    const videoCaptureCanvas    = document.createElement("canvas");
+    videoCaptureCanvas.width = video.videoWidth
+    videoCaptureCanvas.height = video.videoHeight
+
+    const tmpCtx                = videoCaptureCanvas.getContext('2d')!
+    tmpCtx.drawImage(video, 0, 0, videoCaptureCanvas.width, videoCaptureCanvas.height);
+    return videoCaptureCanvas
 }
 
 class BarcodeTFApp2 extends React.Component {
@@ -20,6 +32,7 @@ class BarcodeTFApp2 extends React.Component {
         videoResolution: "VGA",
         colnum: 1,
         rownum: 1,
+        showRect: true,
         showSS: false,
         showGrid: false,
     }
@@ -52,18 +65,10 @@ class BarcodeTFApp2 extends React.Component {
     overlayYOffset = 0
 
 
-    ///////////////
-    // Worker!!  //
-    ///////////////
-    worker_num = 1
-    workerSS:Worker|null = null
-    workerCV:Worker|null = null
 
-    workerSSInitialized = false
-    workerCVInitialized = false
+    multiBarcodReader = new MultiBarcodeReader()
 
-    video_img:ImageData|null = null
-    working_video_img:ImageData|null = null
+
     /**
        * FPS測定用
        */
@@ -81,119 +86,21 @@ class BarcodeTFApp2 extends React.Component {
         }
     }
 
-
-    checkAndStart = () =>{
-        if(this.workerSSInitialized      === true && 
-            this.workerCVInitialized     === true
-            ){
-            this.requestScanBarcode()
-        }
-    }
-
-    previewMask = (maskImage:ImageBitmap) =>{
-        // const offscreen = new OffscreenCanvas(maskImage.width, maskImage.height)
-        // const ctx = offscreen.getContext("2d")!
-        // ctx.putImageData(maskImage, 0, 0)
-
-        const maskMonitor  = this.workerSSMaskMonitorCanvasRef.current!
-        maskMonitor.width  = this.overlayWidth
-        maskMonitor.height = this.overlayHeight
-        const ctx2 = maskMonitor.getContext("2d")!
-        ctx2.drawImage(maskImage, 0, 0, maskMonitor.width, maskMonitor.height)
-    }
-    clearMask = () =>{
-        const maskMonitor  = this.workerSSMaskMonitorCanvasRef.current!
-        maskMonitor.width  = this.overlayWidth
-        maskMonitor.height = this.overlayHeight
-        const ctx2 = maskMonitor.getContext("2d")!
-        ctx2.clearRect(0, 0, maskMonitor.width, maskMonitor.height)
-    }
-    previewAreas = (areas:number[][], barcodes:string[]) =>{
-        const areaCV  = this.workerAreaCVCanvasRef.current!
-        areaCV.width  = this.overlayWidth
-        areaCV.height = this.overlayHeight
-        const ctx2 = areaCV.getContext("2d")!
-        ctx2.clearRect(0, 0, areaCV.width, areaCV.height)
-        ctx2.strokeStyle  = "#DD3333FF";
-        ctx2.lineWidth    = 1;
-        const font       = "32px sans-serif";
-        ctx2.font         = font;
-        ctx2.textBaseline = "top";
-        ctx2.fillStyle = "#DD3333FF";
-
-
-        const area_num = areas.length
-        ctx2.beginPath();
-        for(let i = 0; i < area_num; i ++){
-            if(barcodes[i] === ""){
-                continue
-            }
-            const area = areas[i]
-            ctx2.moveTo(area[0] * areaCV.width + 10, area[1] * areaCV.height + 10)
-            ctx2.lineTo(area[2] * areaCV.width - 10, area[3] * areaCV.height + 10)
-            ctx2.lineTo(area[6] * areaCV.width - 10, area[7] * areaCV.height - 10)
-            ctx2.lineTo(area[4] * areaCV.width + 10, area[5] * areaCV.height - 10)
-            ctx2.lineTo(area[0] * areaCV.width + 10, area[1] * areaCV.height + 10)
-            ctx2.stroke();
-            ctx2.fillText(barcodes[i], area[0] * areaCV.width, area[1] * areaCV.height)
-        }
-        ctx2.closePath();
-
-    }    
-
     /**
      * ワーカーの初期化
      */
     async initWorker() {
-        console.log("Worker initializing... ")
-
-        // SemanticSegmentation 用ワーカー
-        this.workerSS = new Worker('../workers/workerSS.ts', { type: 'module' })
-        this.workerSS.onmessage = (event) => {
-            if (event.data.message === WorkerResponse.INITIALIZED) {
-                console.log("WORKERSS INITIALIZED")
-                this.workerSSInitialized = true
-                this.checkAndStart()
-            }else if(event.data.message === WorkerResponse.PREDICTED_AREA){
-                console.log("MASK PREDICTED", event)
-                this.working_video_img = this.video_img //再キャプチャの前に処理中のimageをバックアップ
-
-                // 再キャプチャ
-                this.requestScanBarcode()
-
-                const maskBitmap = event.data.maskBitmap 
-                if(this.state.showSS){
-                    this.previewMask(maskBitmap)
-                }else{
-                    this.clearMask()
-                }
-
-
-                const videoOffscreen = new OffscreenCanvas(this.working_video_img!.width, this.working_video_img!.height)
-                videoOffscreen.getContext("2d")!.putImageData(this.working_video_img!, 0, 0)
-                const videoBitmap = videoOffscreen.transferToImageBitmap()
-
-                this.workerCV!.postMessage({ message: WorkerCommand.SCAN_BARCODES, videoBitmap: videoBitmap, maskBitmap:maskBitmap}, [videoBitmap, maskBitmap])
-            }
-        }
-
-        // バーコード読み取り用ワーカー
-        this.workerCV = new Worker('../workers/workerCV.ts', { type: 'module' })
-        this.workerCV.onmessage = (event) => {
-            if (event.data.message === WorkerResponse.INITIALIZED) {
-                console.log("WORKERCV INITIALIZED")
-                this.workerCVInitialized = true
-                this.checkAndStart()
-            }else if(event.data.message === WorkerResponse.SCANNED_BARCODES){
-                const barcodes = event.data.barcodes
-                const areas    = event.data.areas
-                console.log("SCANNED_BARCODES", areas, barcodes)
-                this.previewAreas(areas, barcodes)
-                event.data.barcodes = null
-                event.data.areas    = null
-            }
-        }
-
+        this.multiBarcodReader.addInitializedListener(()=>{
+            const props = this.props as any
+            props.initialized()
+            this.requestScanBarcode()
+        })
+        this.multiBarcodReader.addWaitNextFrameListeners(()=>{this.requestScanBarcode()})
+        this.multiBarcodReader.addScanedBarcordListeners(()=>{
+            console.log("SCANNED!!!")
+        })
+//        this.multiBarcodReader.barcodePreviewCanvas = this.workerAreaCVCanvasRef.current!
+        this.multiBarcodReader.init()
         return
     }
 
@@ -225,6 +132,15 @@ class BarcodeTFApp2 extends React.Component {
         this.overlayXOffset = overlayXOffset
         this.overlayYOffset = overlayYOffset
 
+
+        this.workerAreaCVCanvasRef.current!.width  = this.overlayWidth
+        this.workerAreaCVCanvasRef.current!.height = this.overlayHeight
+        this.workerSSMaskMonitorCanvasRef.current!.width  = this.overlayWidth
+        this.workerSSMaskMonitorCanvasRef.current!.height = this.overlayHeight
+        this.controllerCanvasRef.current!.width  = this.overlayWidth
+        this.controllerCanvasRef.current!.height = this.overlayHeight
+
+
         // const status = this.statusCanvasRef.current!
         // const ctx = status.getContext("2d")!
         // ctx.clearRect(0,0,status.width, status.height)
@@ -234,14 +150,14 @@ class BarcodeTFApp2 extends React.Component {
         // ctx.fillText(`${this.overlayXOffset}, ${this.overlayYOffset}, `,100,90)
         // ctx.fillText(`${this.overlayWidth}, ${this.overlayHeight}, `,100,120)
 
-        console.log(`>>>>1   ${this.videoWidth}, ${this.videoHeight}, `)
-        console.log(`>>>>2   ${video.width}, ${video.height}, `)
-        console.log(`>>>>3   ${parentWidth}, ${parentHeight}, `)
-        console.log(`>>>>4   ${this.overlayXOffset}, ${this.overlayYOffset}, `)
-        console.log(`>>>>5   ${this.overlayWidth}, ${this.overlayHeight}, `)
+        // console.log(`>>>>1   ${this.videoWidth}, ${this.videoHeight}, `)
+        // console.log(`>>>>2   ${video.width}, ${video.height}, `)
+        // console.log(`>>>>3   ${parentWidth}, ${parentHeight}, `)
+        // console.log(`>>>>4   ${this.overlayXOffset}, ${this.overlayYOffset}, `)
+        // console.log(`>>>>5   ${this.overlayWidth}, ${this.overlayHeight}, `)
         
-        console.log(`>>>> 6  ${video.getBoundingClientRect().bottom} - ${video.getBoundingClientRect().top}`)
-        console.log(`>>>> 6  ${video.getBoundingClientRect().right} - ${video.getBoundingClientRect().left}`)
+        // console.log(`>>>> 6  ${video.getBoundingClientRect().bottom} - ${video.getBoundingClientRect().top}`)
+        // console.log(`>>>> 6  ${video.getBoundingClientRect().right} - ${video.getBoundingClientRect().left}`)
 
     }
 
@@ -274,7 +190,6 @@ class BarcodeTFApp2 extends React.Component {
             Promise.all([initWorkerPromise, webCamPromise])
                 .then((res) => {
                     console.log('Camera and model ready!')
-                    props.initialized()
                 })
                 .catch(error => {
                     console.error(error);
@@ -322,30 +237,14 @@ class BarcodeTFApp2 extends React.Component {
         controller.width = this.overlayWidth
         controller.height = this.overlayHeight
 
-
-        // if(video.width === 0 || video.height === 0){ // Videoが準備されていない場合スキップ
-        //     window.requestAnimationFrame(this.execMainLoop);
-        // }
-        // if(this.overlayWidth === 0 || this.overlayHeight === 0){ // Videoが準備されていない場合スキップ
-        //     window.requestAnimationFrame(this.execMainLoop);
-        // }
-
         const captureCanvas = captureVideoImageToCanvas(video)
         if(captureCanvas.width === 0){
             captureCanvas.remove()
             window.requestAnimationFrame(this.requestScanBarcode);
             return
         }
-        const boxMetadata   = splitCanvasToBoxes(captureCanvas, this.state.colnum, this.state.rownum)
-        if(this.state.showGrid){
-            drawBoxGrid(controller, boxMetadata)
-        }
 
-        const images = getBoxImageBitmap(captureCanvas, boxMetadata)
-
-        this.workerSS!.postMessage({ message: WorkerCommand.PREDICT_AREA, boxMetadata: boxMetadata, images: images}, images)
-        
-        this.video_img = captureCanvas.getContext("2d")!.getImageData(0, 0, captureCanvas.width, captureCanvas.height)
+        this.multiBarcodReader.requestScanBarcode(captureCanvas, this.state.colnum, this.state.rownum, AIConfig.SPLIT_MARGIN)
         captureCanvas.remove()
 
     }
@@ -424,10 +323,25 @@ class BarcodeTFApp2 extends React.Component {
                     <Dropdown text='row' options={rownumOptions} simple item onChange={(e, { value }) => {
                         this.setState({rownum:value as number})
                     }}/>
+                    <Label basic size="tiny" color={this.state.showRect?"red":"grey"} onClick={()=>{
+                        const newValue = !this.state.showRect
+                        // this.workerAreaCVCanvasRef.current!.width  = this.overlayWidth
+                        // this.workerAreaCVCanvasRef.current!.height = this.overlayHeight
+                        this.multiBarcodReader.barcodePreviewCanvas = newValue ? this.workerAreaCVCanvasRef.current! : null
+                        this.setState({showRect:newValue})
+                    }}>rect</Label>
                     <Label basic size="tiny" color={this.state.showSS?"red":"grey"} onClick={()=>{
-                        this.setState({showSS:!this.state.showSS})
+                        const newValue = !this.state.showSS
+                        // this.workerSSMaskMonitorCanvasRef.current!.width  = this.overlayWidth
+                        // this.workerSSMaskMonitorCanvasRef.current!.height = this.overlayHeight
+                        this.multiBarcodReader.previewCanvas = newValue ? this.workerSSMaskMonitorCanvasRef.current! : null
+                        this.setState({showSS:newValue})
                     }}>ss</Label>
                     <Label basic size="tiny" color={this.state.showGrid?"red":"grey"} onClick={()=>{
+                        const newValue = !this.state.showGrid
+                        // this.controllerCanvasRef.current!.width  = this.overlayWidth
+                        // this.controllerCanvasRef.current!.height = this.overlayHeight
+                        this.multiBarcodReader.girdDrawCanvas = newValue ? this.controllerCanvasRef.current! : null
                         this.setState({showGrid:!this.state.showGrid})
                     }}>grid</Label>
 
@@ -446,13 +360,13 @@ class BarcodeTFApp extends React.Component {
         const props = this.props as any
         return(
             <div>
-                <Label>
+                {/* <Label>
                     A
                 </Label>
                 <br />
                 <Label>
                     b
-                </Label>
+                </Label> */}
                 <BarcodeTFApp2 {...props}/>
             </div>
         )
