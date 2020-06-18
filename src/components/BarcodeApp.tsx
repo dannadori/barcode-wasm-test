@@ -137,7 +137,9 @@ class BarcodeApp extends React.Component {
         if (this.parentHeight !== parentHeight || this.parentWidth !== parentWidth || this.overlayYOffset === 0) {
             this.parentHeight = parentHeight
             this.parentWidth = parentWidth
-            const { overlayWidth, overlayHeight, overlayXOffset, overlayYOffset } = findOverlayLocation(this.parentRef.current!, this.videoWidth, this.videoHeight)
+            // const { overlayWidth, overlayHeight, overlayXOffset, overlayYOffset } = findOverlayLocation(this.parentRef.current!, this.videoWidth, this.videoHeight)
+            const { overlayWidth, overlayHeight, overlayXOffset, overlayYOffset } = findOverlayLocation(this.parentWidth, this.parentHeight, this.videoWidth, this.videoHeight)
+
             this.overlayWidth = overlayWidth
             this.overlayHeight = overlayHeight
             this.overlayXOffset = overlayXOffset

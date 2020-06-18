@@ -15,10 +15,6 @@ function mapStateToProps(state:GlobalState) {
 function mapDispatchToProps(dispatch: Dispatch) {
   return {
     initialized:      (args:string) => {dispatch(Actions.initialized(args))},
-    scanned    :      (args:string) => {dispatch(Actions.scanned(args))},
-    startSelect:      (x:number,y:number) =>{dispatch(Actions.startSelect(x, y))},
-    moveSelect:        (x:number,y:number) =>{dispatch(Actions.moveSelect(x, y))},
-    endSelect:         (x:number,y:number) =>{dispatch(Actions.endSelect(x, y))},
   }
 }
 

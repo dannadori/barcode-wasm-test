@@ -33,17 +33,7 @@ interface OverlayLocation {
     overlayYOffset: number
 }
 
-export function findOverlayLocation(parent: HTMLDivElement, videoWidth: number, videoHeight: number): OverlayLocation {
-    // Canvasの座標空間
-    const parentLeft = parent.getBoundingClientRect().left
-    const parentRight = parent.getBoundingClientRect().right
-    const parentTop = parent.getBoundingClientRect().top
-    const parentBottom = parent.getBoundingClientRect().bottom
-
-    const parentWidth = parentRight - parentLeft
-    const parentHeight = parentBottom - parentTop
-
-    // Videoの表示座標の特定
+export function findOverlayLocation(parentWidth:number, parentHeight:number, videoWidth: number, videoHeight: number): OverlayLocation {
     const parentAspect = parentWidth / parentHeight
     const videoAspect = videoWidth / videoHeight
 
